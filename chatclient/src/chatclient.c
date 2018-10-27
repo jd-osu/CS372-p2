@@ -39,7 +39,7 @@ void get_handle(char* handle)
   {
     // prompt the user
     printf("Enter handle: ");
-//    getline(&input, &input_size, stdin);
+    getline(&input, &input_size, stdin);
 
     if (input[strlen(input)-1] == '\n')
       input[strlen(input)-1] = 0;
