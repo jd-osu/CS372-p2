@@ -56,14 +56,26 @@ void get_handle(char* handle)
   free(input);
 }
 
+int main(int argc, char **argv)
+{
+  char error_text[100];
 
+  // if wrong number of arguments entered
+  if (argc < 3)
+  {
+    fprintf(stderr, "USAGE: %s hostname port\n", argv[0]);
+    exit(1);
+  }
 
-int main(void) {
-	char handle[11];
+  char *hostname = argv[1];
+  int port = atoi(argv[2]);
+  char handle[11];
 
-	get_handle(handle);
+  get_handle(handle);
 
-	printf("Handle is: %s\n", handle);
+  printf("Handle is: %s\n", handle);
+  printf("Hostname is: %s\n", hostname);
+  printf("Port is: %d\n", port);
 
-	return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }
