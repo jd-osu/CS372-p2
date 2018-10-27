@@ -1,6 +1,6 @@
 /************************************************
  * [program name]
- * Author: Jason DiMedio
+ * Author:
  * CS372
  * October 27, 2018
  * This program ...
