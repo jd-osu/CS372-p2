@@ -132,6 +132,28 @@ bool get_message_input(char* msg, char* handle)
 }
 
 /*
+
+ */
+bool get_ack(int s)
+{
+    char notice[] = "sending";
+    char ack[] = "OK";
+    char ack_in[3];
+    bool ready = false;
+    int notice_sent, ack_recvd;
+
+    notice_sent = send(s, notice, strlen(notice), 0);
+    if (notice_sent > 0)
+    {
+    	ack_recvd = recv(s, ack_in, sizeof(ack_in)-1, 0);
+    	if (strcmp(ack, ack_in) == 0)
+    		ready = true;
+    }
+
+    return ready;
+}
+
+/*
  * NOTE: This function was adapted from:
  * "Beej's Guide to Network Programming: Using Internet Sockets"
  * http://beej.us/guide/bgnet/html/single/bgnet.html
@@ -175,7 +197,8 @@ int main(int argc, char **argv)
   /* The following code was adapted from CS344, Lecture 4.2, slide 21
    * "client.c"
    */
-  int socketFD, charsRead;
+  int socketFD;
+  int charsRead = 1;
 
   struct sockaddr_in serverAddress;
   struct hostent* serverHostInfo;
@@ -199,23 +222,26 @@ int main(int argc, char **argv)
 
   ;
 
-  while (get_message_input(message, handle) == true)
+  while (charsRead != 0)
   {
-    int msg_len = strlen(message);
+	  while (get_message_input(message, handle) == true)
+	  {
+		int msg_len = strlen(message);
 
-    // send message to server
-    // This code was adapted from "Beej's Guide to Network Programming"
-    // (See sendall() function above for more information
-    printf("sending string \"%s\" with length of %d\n", message, msg_len);
-    if (sendall(socketFD, message, &msg_len) == -1)
-      error("ERROR writing to socket", 1);
+		// send message to server
+		// This code was adapted from "Beej's Guide to Network Programming"
+		// (See sendall() function above for more information
+		printf("sending string \"%s\" with length of %d\n", message, msg_len);
+		if (sendall(socketFD, message, &msg_len) == -1)
+		  error("ERROR writing to socket", 1);
 
-    //get return message from server
-    memset(message, '\0', sizeof(message));
-    charsRead = recv(socketFD, message, sizeof(message)-1, 0);
-    if (charsRead < 0) error ("ERROR reading from socket",1);
+		//get return message from server
+		memset(message, '\0', sizeof(message));
+		charsRead = recv(socketFD, message, sizeof(message)-1, 0);
+		if (charsRead < 0) error ("ERROR reading from socket",1);
 
-    printf("%s\n", message);
+		printf("%s\n", message);
+	  }
   }
 
   close(socketFD);

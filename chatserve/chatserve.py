@@ -8,6 +8,20 @@
 import sys
 from socket import *
 
+notice = "sending"
+ack = "OK"
+quit_cmd = "\\quit"
+
+def get_ack(socket):
+    ready = False
+    notice_sent = socket.send(notice)
+    if notice_sent > 0 :
+        ack_in = socket.recv(len(ack)+1)
+        if ack_in == ack :
+            ready = True
+            
+    return ready
+
 if (len(sys.argv) < 2) : 
     print "USAGE: ", str(sys.argv[0]), " port"
     exit(1)
@@ -27,8 +41,10 @@ while 1:
     connectionSocket, addr = serverSocket.accept()
 
     in_msg_length = 1
+    conn_good = True
+    stop = False
     
-    while in_msg_length != 0:
+    while in_msg_length != 0 and conn_good and not stop:
         total_read = 0
         in_msg = ""
         
@@ -36,9 +52,22 @@ while 1:
         in_msg_length = len(in_msg)
         
         if in_msg_length != 0 :
-            print in_msg
-            out_msg = handle + "> " + raw_input(handle+": ") + chr(4)
-            connectionSocket.send(out_msg)
+            if in_msg == notice :
+                connectionSocket.send(ack)
+            else :
+                print in_msg
+                
+                input = raw_input(handle+": ")
+                
+                if input == quit_cmd :
+                    stop = True
+                else:                
+                    out_msg = handle + "> " +  + chr(4)
+                
+                    if get_ack(connectionSocket) :
+                        connectionSocket.sendall(out_msg)
+                    else:
+                        conn_good = False
 
     print "connection was closed."
     
