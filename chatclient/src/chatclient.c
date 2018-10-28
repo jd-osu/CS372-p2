@@ -254,7 +254,6 @@ int main(int argc, char **argv)
 			//get return message from server
 			memset(message, '\0', sizeof(message));
 			charsRead = recv(socketFD, message, sizeof(message)-1, 0);
-			if (charsRead < 0) error ("ERROR reading from socket",1);
 
 			if(strcmp(message, notice) == 0)
 			{
@@ -262,7 +261,11 @@ int main(int argc, char **argv)
 				charsRead = recv(socketFD, message, sizeof(message)-1, 0);
 			}
 
-			printf("%s\n", message);
+			if (charsRead < 0) error ("ERROR reading from socket",1);
+			else if (charsRead == 0)
+				conn_good = false;
+			else
+				printf("%s\n", message);
 		}
 		else
 			conn_good = false;
