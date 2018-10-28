@@ -29,11 +29,6 @@ while 1:
     in_msg_length = 1
     
     while in_msg_length != 0:
-        #get size first
-        size = int(connectionSocket.recv(1024))
-        connectionSocket.send("OK")
-        print size
-        
         total_read = 0
         in_msg = ""
         
