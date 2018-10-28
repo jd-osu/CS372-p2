@@ -52,7 +52,7 @@ while 1:
         
         if in_msg_length != 0 :
             print in_msg
-            out_msg = raw_input(handle+": "+4)
+            out_msg = raw_input(handle+": "+chr(4))
             connectionSocket.send(handle + "> " + out_msg)
 
     print "connection was closed."
