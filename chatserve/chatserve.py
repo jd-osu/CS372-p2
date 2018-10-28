@@ -29,7 +29,17 @@ while 1:
     in_msg_length = 1
     
     while in_msg_length != 0:
-        in_msg = connectionSocket.recv(1024)
+        #get size first
+        size = int(connectionSocket.recv(1024))
+        connectionSocket.send("OK")
+        
+        total_read = 0
+        
+        while total_read < size :
+            temp = connectionSocket.recv(1024)
+            total_read += len(temp)
+            in_msg += temp
+        
         in_msg_length = len(in_msg)
         
         if in_msg_length != 0 :

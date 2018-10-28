@@ -110,6 +110,37 @@ int sendall(int s, char *buf, int *len)
     return n==-1?-1:0; // return -1 on failure, 0 on success
 }
 
+
+int send_message(int socket, char *buf)
+{
+  int buf_len = strlen(buf);
+  char buf_len_str [5];
+  char ack_str[5];
+  char ok = "OK";
+  sprintf(buf_len_str, "%d", buf_len);
+
+  send(socket, buf_len_str, strlen(buf_len_str), 0);
+
+  //get ack message from server
+  memset(ack_str, '\0', sizeof(ack_str));
+  int ackRead = recv(socket, ack_str, sizeof(ack_str)-1, 0);
+  if (ackRead < 0) error ("ERROR reading from socket", 1)
+
+  if (strcmp(ack_str, ok) == 0)
+  {
+    // send message to server
+    // This code was adapted from "Beej's Guide to Network Programming"
+    // (See sendall() function above for more information
+    if (sendall(socket, buf, &buf_len) == -1)
+      error("ERROR writing to socket", 1);
+
+  }
+  else
+	error("ERROR no acknowledgment from server",1);
+
+  return 0;
+}
+
 int main(int argc, char **argv)
 {
   // if wrong number of arguments entered
@@ -175,12 +206,7 @@ int main(int argc, char **argv)
       strcat(message, "> ");
       strcat(message, buffer);
 
-      // send message to server
-      // This code was adapted from "Beej's Guide to Network Programming"
-      // (See sendall() function above for more information
-      len = strlen(message);
-      if (sendall(socketFD, message, &len) == -1)
-        error("ERROR writing to socket", 1);
+
 
       //get return message from server
       memset(message, '\0', sizeof(message));
