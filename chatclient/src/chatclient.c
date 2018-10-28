@@ -124,6 +124,9 @@ bool get_message_input(char* msg, char* handle)
       printf("Message must be 1-%d characters.\n", max);
   }
 
+  printf("buffer=%s\n", buffer);
+  printf("close_cmd=%s\n", close_cmd);
+
   if (strcmp(buffer, close_cmd) == 0)
 	  return false;
 
@@ -276,7 +279,7 @@ int main(int argc, char **argv)
 
   close(socketFD);
 
-  printf("Connection closed.\n");
+  printf("Connection was closed.\n");
 
   return EXIT_SUCCESS;
 }
