@@ -41,6 +41,7 @@ void get_handle(char* handle)
 {
   int max = HANDLEMAX;
   char *input;
+  char prompt_str[] = "Enter handle";
   int valid_input = 0;
 
   char space_str[] = " ";
@@ -55,12 +56,7 @@ void get_handle(char* handle)
   // until a valid input is received...
   while (valid_input == 0)
   {
-    // prompt the user
-    printf("Enter handle: ");
-    getline(&input, &input_size, stdin);
-
-    if (input[strlen(input)-1] == '\n')
-      input[strlen(input)-1] = 0;
+    get_input(handle, input);
 
     if ((strstr(input, space_str) == NULL) && (strlen(input) > 0) && (strlen(input) <= max))
       valid_input = 1;
@@ -72,6 +68,20 @@ void get_handle(char* handle)
 
   // free dynamically allocated memory
   free(input);
+}
+
+/************************************************
+ * NAME
+ *
+ * DESCRIPTION
+ *
+ * *********************************************/
+void get_input(char* prompt, char* in)
+{
+  printf("%s: ", prompt);
+  memset(in, '\0', sizeof(in));
+  fgets(in, sizeof(in) - 1, stdin);
+  in[strcspn(in, "\n")] = '\0';
 }
 
 int main(int argc, char **argv)
@@ -88,6 +98,9 @@ int main(int argc, char **argv)
   char handle[HANDLEMAX+1];
   char buffer[BUFFERMAX+1];
   char message[HANDLEMAX+BUFFERMAX+3];
+  char close_cmd[] = "\quit";
+
+  buffer[0] = '\0';
 
   get_handle(handle);
 
@@ -120,27 +133,27 @@ int main(int argc, char **argv)
   if (connect(socketFD, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0)
 	  error("ERROR connecting", 1);
 
-  //get input message from user
-  printf("%s: ", handle);
-  memset(buffer, '\0', sizeof(buffer));
-  fgets(buffer, sizeof(buffer) - 1, stdin);
-  buffer[strcspn(buffer, "\n")] = '\0';
+  while (strcmp(buffer, close_cmd) != 0)
+  {
+	get_input(handle, buffer);
 
-  message[0] = '\0';
-  strcat(message, handle);
-  strcat(message, "> ");
-  strcat(message, buffer);
+    message[0] = '\0';
+    strcat(message, handle);
+    strcat(message, "> ");
+    strcat(message, buffer);
 
-  // send message to server
-  charsWritten = send(socketFD, message, strlen(message), 0);
-  if (charsWritten < 0) error("ERROR writing to socket", 1);
-  if (charsWritten < strlen(message)) printf("WARNING: Not all data written to socket.\n");
+    // send message to server
+    charsWritten = send(socketFD, message, strlen(message), 0);
+    if (charsWritten < 0) error("ERROR writing to socket", 1);
+    if (charsWritten < strlen(message)) printf("WARNING: Not all data written to socket.\n");
 
-  //get return message from server
-  memset(message, '\0', sizeof(message));
-  charsRead = recv(socketFD, message, sizeof(message)-1, 0);
-  if (charsRead < 0) error ("ERROR reading from socket", 1);
-  printf("%s\n", message);
+    //get return message from server
+    memset(message, '\0', sizeof(message));
+    charsRead = recv(socketFD, message, sizeof(message)-1, 0);
+    if (charsRead < 0) error ("ERROR reading from socket", 1);
+
+    printf("%s\n", message);
+  }
 
   close(socketFD);
 
