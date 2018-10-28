@@ -15,13 +15,13 @@ To compile (client only):
 		make
 
 To run:
-	Client:
-	In the directory where the program files are stored, type:
-		client [HOSTNAME] [PORT NUMBER]   (example: "client flip1.engr.oregonstate.edu 99999")
-		
 	Server:
 	In the directory where the program files are stored, type:
 		python chatserve.py [PORT NUMBER] (example: "python chatserve.py 99999")
+
+	Client:
+	In the directory where the program files are stored, type:
+		client [HOSTNAME] [PORT NUMBER]   (example: "client flip1.engr.oregonstate.edu 99999")
 
 To operate:
 
