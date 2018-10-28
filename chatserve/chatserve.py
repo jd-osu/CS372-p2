@@ -17,6 +17,7 @@ quit_cmd = "\\quit"
 # "Stack Overflow: How do I capture SIGINT in Python?"
 # https://stackoverflow.com/questions/1112343/how-do-i-capture-sigint-in-python
 def signal_handler (sig, frame):
+    print ""
     sys.exit(0)
 
 signal.signal(signal.SIGINT, signal_handler)
