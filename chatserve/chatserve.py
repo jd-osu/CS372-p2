@@ -27,14 +27,14 @@ while 1:
     connectionSocket, addr = serverSocket.accept()
 
     in_msg_length = 1
-    out_msg_length = 1
     
-    while in_msg_length != 0 and out_msg_length != 0 :
+    while in_msg_length != 0:
         in_msg = connectionSocket.recv(1024)
         in_msg_length = len(in_msg)
         
-        out_msg = raw_input(handle+":")
-        out_msg_length = connectionSocket.send(out_msg)
+        if in_msg_length != 0 :
+            out_msg = raw_input(handle+": ")
+            connectionSocket.send(out_msg)
 
     print "connection was closed."
     
