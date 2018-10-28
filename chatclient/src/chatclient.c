@@ -70,7 +70,7 @@ void get_handle(char* handle)
   // until a valid input is received...
   while (valid_input == 0)
   {
-    get_input(handle, input);
+    get_input(prompt_str, input);
 
     if ((strstr(input, space_str) == NULL) && (strlen(input) > 0) && (strlen(input) <= max))
       valid_input = 1;
