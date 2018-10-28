@@ -13,10 +13,19 @@ ack = "OK"
 quit_cmd = "\\quit"
 
 def get_ack(socket):
+    print "beginning of get_ack"
+    print "socket=", socket
+    print "notice=", notice
+    print "ack=", ack
+    
     ready = False
     notice_sent = socket.send(notice)
+    
+    print "notice_sent=", notice_sent
+    
     if notice_sent > 0 :
         ack_in = socket.recv(len(ack)+1)
+        print "ack_in=", ack_in
         if ack_in == ack :
             ready = True
             
