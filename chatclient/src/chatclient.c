@@ -172,8 +172,6 @@ int main(int argc, char **argv)
   bool quit = false;
   int len;
 
-  buffer[0] = '\0';
-
   get_handle(handle);
 
   //printf("Handle is: %s\n", handle);
