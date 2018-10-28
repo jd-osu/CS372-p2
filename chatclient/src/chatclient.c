@@ -43,10 +43,16 @@ void error(const char *msg, int e)
  * *********************************************/
 void get_input(char* prompt, char* in)
 {
-  printf("%s: ", prompt);
   memset(in, '\0', sizeof(in));
-  fgets(in, sizeof(in) - 1, stdin);
-  in[strcspn(in, "\n")] = '\0';
+
+  size_t input_size = 50;
+  size_t chars;
+
+  printf("%s: ", prompt);
+  chars = getline(&in, &input_size, stdin);
+
+  if (in[strlen(in)-1] == '\n')
+    in[strlen(in)-1] = 0;
 }
 
 /************************************************
