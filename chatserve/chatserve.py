@@ -33,6 +33,7 @@ while 1:
         in_msg_length = len(in_msg)
         
         if in_msg_length != 0 :
+            print in_msg
             out_msg = raw_input(handle+": ")
             connectionSocket.send(handle + "> " + out_msg)
 
