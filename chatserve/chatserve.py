@@ -14,6 +14,7 @@ if (len(sys.argv) < 2) :
 
 port = int(sys.argv[1])
 
+handle = "ChatServer"
 
 # The following code has been adapted from CS372, Lecture 15, slide 9
 # "Example application: TCP server"
@@ -22,15 +23,20 @@ serverSocket.bind(('',port))
 serverSocket.listen(1)
 
 while 1:
+    print "listening for new connection..."
     connectionSocket, addr = serverSocket.accept()
-    
-    sentence = connectionSocket.recv(1024)
-    capitalizedSentence = sentence.upper()
-    connectionSocket.send(capitalizedSentence)
 
-    sentence = connectionSocket.recv(1024)
-    print "sentence: ", sentence
-    print "sentence length: ", len(sentence)
+    in_msg_length = 1
+    
+    while in_msg_length != 0 && out_msg_length != 0 :
+        in_msg = connectionSocket.recv(1024)
+        in_msg_length = len(in_msg)
+        
+        out_msg = raw_input(handle,":")
+        out_msg_length = connectionSocket.send(out_msg)
+
+    print "connection was closed."
+    
 
 #    connectionSocket.close()
 
