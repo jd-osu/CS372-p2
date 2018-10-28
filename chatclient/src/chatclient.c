@@ -334,7 +334,7 @@ int main(int argc, char **argv)
 
 	else
 	{
-      message = malloc(HANDLEMAX+BUFFERMAX+4 * sizeof(char));
+      message = malloc((strlen(handle)+strlen(buffer)+4) * sizeof(char));
       if (message == NULL)
     	  error("Could not allocate memory", 1);
 
@@ -344,9 +344,9 @@ int main(int argc, char **argv)
       strcat(message, buffer);
 
       write_socket(socketFD, message);
+      free(message);
 
       //get return message from server
-      memset(message, '\0', sizeof(message));
       message = read_socket(socketFD);
 
       printf("%s\n", message);
