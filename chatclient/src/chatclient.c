@@ -44,7 +44,7 @@ void get_input(char* prompt, char* in)
 {
   memset(in, '\0', sizeof(in));
 
-  size_t input_size = 50;
+  size_t input_size = BUFFERMAX;
   size_t chars;
 
   printf("%s: ", prompt);
