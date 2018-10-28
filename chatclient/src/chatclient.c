@@ -183,6 +183,7 @@ int main(int argc, char **argv)
       // send message to server
       // This code was adapted from "Beej's Guide to Network Programming"
       // (See sendall() function above for more information
+      printf("sending string \"%s\" with length of %d\n", message, msg_len);
       if (sendall(socketFD, message, &msg_len) == -1)
         error("ERROR writing to socket", 1);
 
