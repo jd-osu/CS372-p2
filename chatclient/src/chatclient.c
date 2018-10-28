@@ -275,6 +275,8 @@ int main(int argc, char **argv)
 			conn_good = false;
 
 	  }
+
+	  conn_good = false;
   }
 
   close(socketFD);
