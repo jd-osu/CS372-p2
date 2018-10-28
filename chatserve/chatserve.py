@@ -39,7 +39,7 @@ while 1:
         while total_read < size :
             temp = connectionSocket.recv(1024)
             total_read += len(temp)
-            in_msg += temp
+            in_msg = in_msg + temp
         
         in_msg_length = len(in_msg)
         
