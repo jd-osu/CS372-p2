@@ -33,7 +33,7 @@ while 1:
         in_msg = connectionSocket.recv(1024)
         in_msg_length = len(in_msg)
         
-        out_msg = raw_input(handle,":")
+        out_msg = raw_input(handle+":")
         out_msg_length = connectionSocket.send(out_msg)
 
     print "connection was closed."
