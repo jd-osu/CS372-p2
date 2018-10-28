@@ -155,7 +155,7 @@ int send_message(int socket, char *buf)
  *   terminating character "EOT". The read string
  *   is then returned.
  * *********************************************/
-char *read_socket(int socket)
+char *read_socket(int socket, char* msg)
 {
   int charsRead, charsWritten;
   char *text = NULL;
@@ -212,7 +212,8 @@ char *read_socket(int socket)
     memset(buffer, 0, sizeof(buffer));
   }
 
-  return text;
+  strcpy(msg, text);
+  free(text);
 }
 
 /************************************************
@@ -287,7 +288,7 @@ int main(int argc, char **argv)
   int port = atoi(argv[2]);
   char handle[HANDLEMAX+1];
   char buffer[BUFFERMAX+1];
-  char* message;
+  char message[HANDLEMAX+BUFFERMAX+4]
   char close_cmd[] = "\\quit";
   bool quit = false;
   int len;
@@ -344,13 +345,11 @@ int main(int argc, char **argv)
       strcat(message, buffer);
 
       write_socket(socketFD, message);
-      free(message);
 
       //get return message from server
-      message = read_socket(socketFD);
+      read_socket(socketFD, message);
 
       printf("%s\n", message);
-      free(message);
 
 	}
   }
