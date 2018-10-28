@@ -258,8 +258,11 @@ int main(int argc, char **argv)
 			if(strcmp(message, notice) == 0)
 			{
 				send(socketFD, ack, strlen(ack), 0);
+				memset(message, '\0', sizeof(message));
 				charsRead = recv(socketFD, message, sizeof(message)-1, 0);
 			}
+
+			printf("charsRead=%d\n", charsRead);
 
 			if (charsRead < 0) error ("ERROR reading from socket",1);
 			else if (charsRead == 0)
