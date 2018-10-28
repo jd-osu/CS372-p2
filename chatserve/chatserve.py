@@ -6,8 +6,7 @@
 # This program ...
 
 import sys
-import socket
-from _socket import SOCK_STREAM, AF_INET
+from socket import *
 
 if (len(sys.argv) < 2) : 
     print "USAGE: ", str(sys.argv[0]), " port"
