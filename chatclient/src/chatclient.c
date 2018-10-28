@@ -237,7 +237,7 @@ int main(int argc, char **argv)
 
   while (charsRead != 0)
   {
-	  while (get_message_input(message, handle) == true && conn_good = true)
+	  while (get_message_input(message, handle) == true && conn_good == true)
 	  {
 		int msg_len = strlen(message);
 		int msg_sent;
@@ -263,7 +263,7 @@ int main(int argc, char **argv)
 				printf("%s\n", message);
 		}
 		else
-			conn_good = false
+			conn_good = false;
 
 	  }
   }
