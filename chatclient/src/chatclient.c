@@ -121,14 +121,13 @@ void get_message_input(char* msg, char* handle)
       printf("Message must be 1-%d characters.\n", max);
   }
 
-  if (strcmp(buffer, close_cmd) == 0)
-	msg=NULL;
-  else
+  if (strcmp(buffer, close_cmd) != 0)
   {
 	strcat(msg, handle);
 	strcat(msg, "> ");
-	strcat(msg, buffer);
   }
+
+  strcat(msg, buffer);
 }
 
 /*
@@ -171,6 +170,7 @@ int main(int argc, char **argv)
   char message[HANDLEMAX+MESSAGEMAX+4];
   bool quit = false;
   int len;
+  char close_cmd[] = "\\quit";
 
   get_handle(handle);
 
@@ -205,7 +205,7 @@ int main(int argc, char **argv)
 
   get_message_input(message, handle);
 
-  while (message != NULL)
+  while (strcmp(message, close_cmd) != 0)
   {
     int msg_len = strlen(message);
 
