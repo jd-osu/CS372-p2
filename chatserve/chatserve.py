@@ -32,7 +32,7 @@ while 1:
         total_read = 0
         in_msg = ""
         
-        in_msg = connectionSocket.recv(1024)
+        in_msg = connectionSocket.recv(2000)
         in_msg_length = len(in_msg)
         
         if in_msg_length != 0 :
