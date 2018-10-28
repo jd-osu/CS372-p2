@@ -238,7 +238,7 @@ int main(int argc, char **argv)
 
   ;
 
-  while (charsRead != 0)
+  while (conn_good == true)
   {
 	  while (conn_good == true && get_message_input(message, handle) == true)
 	  {
