@@ -12,24 +12,15 @@ notice = "sending"
 ack = "OK"
 quit_cmd = "\\quit"
 
-def get_ack(socket):
-    print "beginning of get_ack"
-    print "socket=", socket
-    print "notice=", notice
-    print "ack=", ack
-    
+def get_ack(socket):    
     ready = False
     notice_sent = socket.send(notice)
     
-    print "notice_sent=", notice_sent
-    
     if notice_sent > 0 :
         ack_in = socket.recv(len(ack)+1)
-        print "ack_in=", ack_in
         if ack_in == ack :
             ready = True
-    
-    print "ready=", ready        
+            
     return ready
 
 if (len(sys.argv) < 2) : 
@@ -47,7 +38,7 @@ serverSocket.bind(('',port))
 serverSocket.listen(1)
 
 while 1:
-    print "listening for new connection..."
+    print "Listening for new connection..."
     connectionSocket, addr = serverSocket.accept()
 
     in_msg_length = 1
@@ -75,12 +66,11 @@ while 1:
                     out_msg = handle + "> " + input
          
                     if get_ack(connectionSocket) :
-                        print "sending message: ", out_msg
                         connectionSocket.sendall(out_msg)
                     else:
                         conn_good = False
 
-    print "connection was closed."
+    print "Connection was closed."
     
 
     connectionSocket.close()

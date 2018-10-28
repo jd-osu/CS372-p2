@@ -262,8 +262,6 @@ int main(int argc, char **argv)
 				charsRead = recv(socketFD, message, sizeof(message)-1, 0);
 			}
 
-			printf("charsRead=%d\n", charsRead);
-
 			if (charsRead < 0) error ("ERROR reading from socket",1);
 			else if (charsRead == 0)
 				conn_good = false;
