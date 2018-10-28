@@ -34,7 +34,7 @@ while 1:
         
         stop = False
      
-        while stop == False :
+ #       while stop == False :
             temp = connectionSocket.recv(1024)
             print "read ", len(temp), " bytes"
             print "temp= ", temp
