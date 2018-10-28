@@ -126,7 +126,7 @@ int main(int argc, char **argv)
   fgets(buffer, sizeof(buffer) - 1, stdin);
   buffer[strcspn(buffer, "\n")] = '\0';
 
-  message = '\0';
+  message[0] = '\0';
   strcat(message, handle);
   strcat(message, buffer);
 
