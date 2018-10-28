@@ -35,18 +35,18 @@ while 1:
         stop = False
      
  #       while stop == False :
-            temp = connectionSocket.recv(1024)
-            print "read ", len(temp), " bytes"
-            print "temp= ", temp
-            for i in range(0, len(temp)-1):
-                if temp[i] == 4 :
-                    stop = True
-                    temp[i] = '\0'
-                    break
-            in_msg = in_msg + temp
-            total_read += len(temp)
-            print "in_msg= ", in_msg
-            print "total_read= ", total_read
+        temp = connectionSocket.recv(1024)
+        print "read ", len(temp), " bytes"
+        print "temp= ", temp
+        for i in range(0, len(temp)-1):
+            if temp[i] == 4 :
+                stop = True
+                temp[i] = '\0'
+                break
+        in_msg = in_msg + temp
+        total_read += len(temp)
+        print "in_msg= ", in_msg
+        print "total_read= ", total_read
   
         in_msg_length = len(in_msg)
         
