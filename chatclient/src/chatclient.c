@@ -14,7 +14,8 @@
 #include <netdb.h>
 
 #define HANDLEMAX 10	// max length of handles
-#define BUFFERMAX 500	// max length of string buffer
+#define MESSAGEMAX 500  // max length of messages
+#define BUFFERMAX 1000	// max length of string buffer
 
 // bool type defined as true/false logic is used extensively
 typedef enum {false, true} bool;
@@ -93,6 +94,43 @@ void get_handle(char* handle)
   free(input);
 }
 
+/************************************************
+ * NAME
+ *
+ * DESCRIPTION
+ *
+ * *********************************************/
+void get_message_input(char* msg, char* handle)
+{
+  int max = MESSAGEMAX;
+  bool valid_input = false;
+  char buffer[BUFFERMAX+1];
+  char close_cmd[] = "\\quit";
+
+  memset(buffer, '\0', sizeof(buffer));
+  memset(msg, '\0', sizeof(msg));
+
+  // until a valid input is received...
+  while (valid_input == false)
+  {
+    get_input(handle, buffer);
+
+    if (strlen(buffer) > 0 && strlen(buffer) <= max)
+      valid_input = true;
+    else
+      printf("Message must be 1-%d characters.\n", max);
+  }
+
+  if (strcmp(buffer, close_cmd) == 0)
+	msg=NULL;
+  else
+  {
+	strcat(msg, handle);
+	strcat(msg, "> ");
+	strcat(msg, buffer);
+  }
+}
+
 /*
  * NOTE: This function was adapted from:
  * "Beej's Guide to Network Programming: Using Internet Sockets"
@@ -130,9 +168,7 @@ int main(int argc, char **argv)
   char *hostname = argv[1];
   int port = atoi(argv[2]);
   char handle[HANDLEMAX+1];
-  char buffer[BUFFERMAX+1];
-  char message[HANDLEMAX+BUFFERMAX+4];
-  char close_cmd[] = "\\quit";
+  char message[HANDLEMAX+MESSAGEMAX+4];
   bool quit = false;
   int len;
 
@@ -169,37 +205,27 @@ int main(int argc, char **argv)
   if (connect(socketFD, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0)
 	  error("ERROR connecting", 1);
 
-  while (quit == false)
+  get_message_input(message, handle);
+
+  while (message != NULL)
   {
-	get_input(handle, buffer);
+    int msg_len = strlen(message);
 
-	if (strcmp(buffer, close_cmd) == 0)
-	  quit = true;
+    // send message to server
+    // This code was adapted from "Beej's Guide to Network Programming"
+    // (See sendall() function above for more information
+    printf("sending string \"%s\" with length of %d\n", message, msg_len);
+    if (sendall(socketFD, message, &msg_len) == -1)
+      error("ERROR writing to socket", 1);
 
-	else
-	{
-	  memset(message, '\0', sizeof(message));
-      strcat(message, handle);
-      strcat(message, "> ");
-      strcat(message, buffer);
+    //get return message from server
+    memset(message, '\0', sizeof(message));
+    int charsRead = recv(socketFD, message, sizeof(message)-1, 0);
+    if (charsRead < 0) error ("ERROR reading from socket",1);
 
-      int msg_len = strlen(message);
+    printf("%s\n", message);
 
-      // send message to server
-      // This code was adapted from "Beej's Guide to Network Programming"
-      // (See sendall() function above for more information
-      printf("sending string \"%s\" with length of %d\n", message, msg_len);
-      if (sendall(socketFD, message, &msg_len) == -1)
-        error("ERROR writing to socket", 1);
-
-      //get return message from server
-      memset(message, '\0', sizeof(message));
-      int charsRead = recv(socketFD, message, sizeof(message)-1, 0);
-      if (charsRead < 0) error ("ERROR reading from socket",1);
-
-      printf("%s\n", message);
-
-	}
+    get_message_input(message, handle);
   }
 
   close(socketFD);
