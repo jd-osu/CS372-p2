@@ -37,6 +37,20 @@ void error(const char *msg, int e)
  * DESCRIPTION
  *
  * *********************************************/
+void get_input(char* prompt, char* in)
+{
+  printf("%s: ", prompt);
+  memset(in, '\0', sizeof(in));
+  fgets(in, sizeof(in) - 1, stdin);
+  in[strcspn(in, "\n")] = '\0';
+}
+
+/************************************************
+ * NAME
+ *
+ * DESCRIPTION
+ *
+ * *********************************************/
 void get_handle(char* handle)
 {
   int max = HANDLEMAX;
@@ -70,20 +84,6 @@ void get_handle(char* handle)
   free(input);
 }
 
-/************************************************
- * NAME
- *
- * DESCRIPTION
- *
- * *********************************************/
-void get_input(char* prompt, char* in)
-{
-  printf("%s: ", prompt);
-  memset(in, '\0', sizeof(in));
-  fgets(in, sizeof(in) - 1, stdin);
-  in[strcspn(in, "\n")] = '\0';
-}
-
 int main(int argc, char **argv)
 {
   // if wrong number of arguments entered
@@ -98,7 +98,7 @@ int main(int argc, char **argv)
   char handle[HANDLEMAX+1];
   char buffer[BUFFERMAX+1];
   char message[HANDLEMAX+BUFFERMAX+3];
-  char close_cmd[] = "\quit";
+  char close_cmd[] = "\\quit";
 
   buffer[0] = '\0';
 
