@@ -334,6 +334,10 @@ int main(int argc, char **argv)
 
 	else
 	{
+      message = malloc(HANDLEMAX+BUFFERMAX+4 * sizeof(char));
+      if (message == NULL)
+    	  error("Could not allocate memory", 1);
+
 	  memset(message, '\0', sizeof(message));
       strcat(message, handle);
       strcat(message, "> ");
@@ -346,6 +350,7 @@ int main(int argc, char **argv)
       message = read_socket(socketFD);
 
       printf("%s\n", message);
+      free(message);
 
 	}
   }
