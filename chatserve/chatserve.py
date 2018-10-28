@@ -34,6 +34,7 @@ while 1:
         connectionSocket.send("OK")
         
         total_read = 0
+        in_msg = ""
         
         while total_read < size :
             temp = connectionSocket.recv(1024)
