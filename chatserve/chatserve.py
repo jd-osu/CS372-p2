@@ -106,7 +106,7 @@ while 1:
                     else:
                         conn_good = False
 
-    print "Chat connection was closed."
+    print "Chat connection closed."
     
 
     connectionSocket.close()
