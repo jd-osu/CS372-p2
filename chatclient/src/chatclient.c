@@ -285,7 +285,7 @@ int main(int argc, char **argv)
   int port = atoi(argv[2]);
   char handle[HANDLEMAX+1];
   char buffer[BUFFERMAX+1];
-  char message[HANDLEMAX+BUFFERMAX+3];
+  char* message;
   char close_cmd[] = "\\quit";
   bool quit = false;
   int len;
