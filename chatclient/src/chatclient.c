@@ -228,7 +228,9 @@ char *read_socket(int socket)
 void *write_socket(int socket, const char *text)
 {
   int charsWritten, cap, chunk = 0, totalWritten = 0;
-  char term = 4;
+  char term[2];
+  term[0] = 4;
+  term[1] = '\0';
   char *out_str = NULL;
   char buffer[TX_LIMIT];
   int cur_idx = 0;
