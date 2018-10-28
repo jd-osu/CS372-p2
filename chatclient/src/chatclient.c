@@ -13,6 +13,9 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
+#define HANDLEMAX 10	// max length of handles
+#define BUFFERMAX 300	// max length of string buffer
+
 /************************************************
  * NAME
  *   error
@@ -36,6 +39,7 @@ void error(const char *msg, int e)
  * *********************************************/
 void get_handle(char* handle)
 {
+  int max = HANDLEMAX;
   char *input;
   int valid_input = 0;
 
@@ -58,10 +62,10 @@ void get_handle(char* handle)
     if (input[strlen(input)-1] == '\n')
       input[strlen(input)-1] = 0;
 
-    if ((strstr(input, space_str) == NULL) && (strlen(input) > 0) && (strlen(input) <= 10))
+    if ((strstr(input, space_str) == NULL) && (strlen(input) > 0) && (strlen(input) <= max))
       valid_input = 1;
     else
-      printf("Handle must be 1-10 characters with no spaces.\n");
+      printf("Handle must be 1-%d characters with no spaces.\n", max);
   }
 
   strcpy(handle, input);
@@ -72,8 +76,6 @@ void get_handle(char* handle)
 
 int main(int argc, char **argv)
 {
-  char error_text[100];
-
   // if wrong number of arguments entered
   if (argc < 3)
   {
@@ -83,13 +85,15 @@ int main(int argc, char **argv)
 
   char *hostname = argv[1];
   int port = atoi(argv[2]);
-  char handle[11];
+  char handle[HANDLEMAX+1];
+  char buffer[BUFFERMAX+1];
+  char message[HANDLEMAX+BUFFERMAX+1];
 
   get_handle(handle);
 
-  printf("Handle is: %s\n", handle);
-  printf("Hostname is: %s\n", hostname);
-  printf("Port is: %d\n", port);
+  //printf("Handle is: %s\n", handle);
+  //printf("Hostname is: %s\n", hostname);
+  //printf("Port is: %d\n", port);
 
   /* The following code was adapted from CS344, Lecture 4.2, slide 21
    * "client.c"
@@ -98,7 +102,6 @@ int main(int argc, char **argv)
 
   struct sockaddr_in serverAddress;
   struct hostent* serverHostInfo;
-  char buffer[256];
 
   memset((char*)&serverAddress, '\0', sizeof(serverAddress));
   serverAddress.sin_family = AF_INET;
@@ -118,21 +121,25 @@ int main(int argc, char **argv)
 	  error("ERROR connecting", 1);
 
   //get input message from user
-  printf("Enter text to send to the server: ");
+  printf("%s: ", handle);
   memset(buffer, '\0', sizeof(buffer));
   fgets(buffer, sizeof(buffer) - 1, stdin);
   buffer[strcspn(buffer, "\n")] = '\0';
 
+  message = '\0';
+  strcat(message, handle);
+  strcat(message, buffer);
+
   // send message to server
-  charsWritten = send(socketFD, buffer, strlen(buffer), 0);
+  charsWritten = send(socketFD, message, strlen(message), 0);
   if (charsWritten < 0) error("ERROR writing to socket", 1);
-  if (charsWritten < strlen(buffer)) printf("WARNING: Not all data written to socket.\n");
+  if (charsWritten < strlen(message)) printf("WARNING: Not all data written to socket.\n");
 
   //get return message from server
-  memset(buffer, '\0', sizeof(buffer));
-  charsRead = recv(socketFD, buffer, sizeof(buffer)-1, 0);
+  memset(message, '\0', sizeof(message));
+  charsRead = recv(socketFD, message, sizeof(message)-1, 0);
   if (charsRead < 0) error ("ERROR reading from socket", 1);
-  printf("Received from server: \"%s\"\n", buffer);
+  printf("%s\n", message);
 
   close(socketFD);
 
