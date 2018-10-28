@@ -288,7 +288,7 @@ int main(int argc, char **argv)
   int port = atoi(argv[2]);
   char handle[HANDLEMAX+1];
   char buffer[BUFFERMAX+1];
-  char message[HANDLEMAX+BUFFERMAX+4]
+  char message[HANDLEMAX+BUFFERMAX+4];
   char close_cmd[] = "\\quit";
   bool quit = false;
   int len;
@@ -335,10 +335,6 @@ int main(int argc, char **argv)
 
 	else
 	{
-      message = malloc((strlen(handle)+strlen(buffer)+4) * sizeof(char));
-      if (message == NULL)
-    	  error("Could not allocate memory", 1);
-
 	  memset(message, '\0', sizeof(message));
       strcat(message, handle);
       strcat(message, "> ");
