@@ -87,6 +87,29 @@ void get_handle(char* handle)
   free(input);
 }
 
+/*
+ * NOTE: This function was adapted from:
+ * "Beej's Guide to Network Programming: Using Internet Sockets"
+ * http://beej.us/guide/bgnet/html/single/bgnet.html
+ */
+int sendall(int s, char *buf, int *len)
+{
+    int total = 0;        // how many bytes we've sent
+    int bytesleft = *len; // how many we have left to send
+    int n;
+
+    while(total < *len) {
+        n = send(s, buf+total, bytesleft, 0);
+        if (n == -1) { break; }
+        total += n;
+        bytesleft -= n;
+    }
+
+    *len = total; // return number actually sent here
+
+    return n==-1?-1:0; // return -1 on failure, 0 on success
+}
+
 int main(int argc, char **argv)
 {
   // if wrong number of arguments entered
@@ -103,6 +126,7 @@ int main(int argc, char **argv)
   char message[HANDLEMAX+BUFFERMAX+3];
   char close_cmd[] = "\\quit";
   bool quit = false;
+  int len;
 
   buffer[0] = '\0';
 
@@ -152,9 +176,11 @@ int main(int argc, char **argv)
       strcat(message, buffer);
 
       // send message to server
-      charsWritten = send(socketFD, message, strlen(message), 0);
-      if (charsWritten < 0) error("ERROR writing to socket", 1);
-      if (charsWritten < strlen(message)) printf("WARNING: Not all data written to socket.\n");
+      // This code was adapted from "Beej's Guide to Network Programming"
+      // (See sendall() function above for more information
+      len = strlen(message);
+      if (sendall(socketFD, message, &len) == -1)
+        error("ERROR writing to socket", 1);
 
       //get return message from server
       memset(message, '\0', sizeof(message));
