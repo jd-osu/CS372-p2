@@ -30,6 +30,7 @@ while 1:
 
     sentence = connectionSocket.recv(1024)
     print "sentence: ", sentence
+    print "sentence length: ", len(sentence)
 
 #    connectionSocket.close()
 
