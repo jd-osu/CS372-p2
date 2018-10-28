@@ -27,6 +27,10 @@ while 1:
     sentence = connectionSocket.recv(1024)
     capitalizedSentence = sentence.upper()
     connectionSocket.send(capitalizedSentence)
-    connectionSocket.close()
+
+    sentence = connectionSocket.recv(1024)
+    print "sentence: ", sentence
+
+#    connectionSocket.close()
 
 
