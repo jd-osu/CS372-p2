@@ -17,6 +17,9 @@
 #define MESSAGEMAX 500  // max length of message text
 #define BUFFERMAX 1000	// max length of string buffer
 
+static const char notice[] = "sending";
+static const char ack[] = "OK";
+
 // bool type defined as true/false logic is used extensively
 typedef enum {false, true} bool;
 
@@ -136,8 +139,6 @@ bool get_message_input(char* msg, char* handle)
  */
 bool get_ack(int s)
 {
-    char notice[] = "sending";
-    char ack[] = "OK";
     char ack_in[3];
     bool ready = false;
     int notice_sent, ack_recvd;
@@ -162,18 +163,29 @@ int sendall(int s, char *buf, int *len)
 {
     int total = 0;        // how many bytes we've sent
     int bytesleft = *len; // how many we have left to send
-    int n;
+    int n, ret;
 
-    while(total < *len) {
-        n = send(s, buf+total, bytesleft, 0);
-        if (n == -1) { break; }
-        total += n;
-        bytesleft -= n;
+    if (get_ack(s))
+    {
+        while(total < *len) {
+            n = send(s, buf+total, bytesleft, 0);
+            if (n == -1)
+            {
+            	ret = -1;
+            	break;
+            }
+            total += n;
+            bytesleft -= n;
+        }
+
+        *len = total; // return number actually sent here
+
+        ret = total;
     }
+    else
+    	ret = 0;
 
-    *len = total; // return number actually sent here
-
-    return n==-1?-1:0; // return -1 on failure, 0 on success
+    return ret;
 }
 
 
@@ -191,6 +203,7 @@ int main(int argc, char **argv)
   int port = atoi(argv[2]);
   char handle[HANDLEMAX+1];
   char message[HANDLEMAX+MESSAGEMAX+4];
+  bool conn_good = true;
 
   get_handle(handle);
 
@@ -224,27 +237,40 @@ int main(int argc, char **argv)
 
   while (charsRead != 0)
   {
-	  while (get_message_input(message, handle) == true)
+	  while (get_message_input(message, handle) == true && conn_good = true)
 	  {
 		int msg_len = strlen(message);
+		int msg_sent;
 
 		// send message to server
 		// This code was adapted from "Beej's Guide to Network Programming"
 		// (See sendall() function above for more information
 		printf("sending string \"%s\" with length of %d\n", message, msg_len);
-		if (sendall(socketFD, message, &msg_len) == -1)
+		msg_sent = sendall(socketFD, message, &msg_len);
+
+		if (msg_sent < 0)
 		  error("ERROR writing to socket", 1);
+		else if (msg_sent > 0)
+		{
+			//get return message from server
+			memset(message, '\0', sizeof(message));
+			charsRead = recv(socketFD, message, sizeof(message)-1, 0);
+			if (charsRead < 0) error ("ERROR reading from socket",1);
 
-		//get return message from server
-		memset(message, '\0', sizeof(message));
-		charsRead = recv(socketFD, message, sizeof(message)-1, 0);
-		if (charsRead < 0) error ("ERROR reading from socket",1);
+			if(strcmp(message, notice) == 0)
+				send(socketFD, ack, strlen(ack), 0);
+			else
+				printf("%s\n", message);
+		}
+		else
+			conn_good = false
 
-		printf("%s\n", message);
 	  }
   }
 
   close(socketFD);
+
+  printf("Connection closed.\n");
 
   return EXIT_SUCCESS;
 }
