@@ -202,7 +202,7 @@ int main(int argc, char **argv)
   char *hostname = argv[1];
   int port = atoi(argv[2]);
   char handle[HANDLEMAX+1];
-  char message[HANDLEMAX+MESSAGEMAX+4];
+  char message[HANDLEMAX+MESSAGEMAX+3];
   bool conn_good = true;
 
   get_handle(handle);
@@ -245,7 +245,6 @@ int main(int argc, char **argv)
 		// send message to server
 		// This code was adapted from "Beej's Guide to Network Programming"
 		// (See sendall() function above for more information
-		printf("sending string \"%s\" with length of %d\n", message, msg_len);
 		msg_sent = sendall(socketFD, message, &msg_len);
 
 		if (msg_sent < 0)

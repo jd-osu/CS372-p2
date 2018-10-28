@@ -62,7 +62,7 @@ while 1:
                 if input == quit_cmd :
                     stop = True
                 else:                
-                    out_msg = handle + "> " +  + chr(4)
+                    out_msg = handle + "> " + input
                 
                     if get_ack(connectionSocket) :
                         connectionSocket.sendall(out_msg)
