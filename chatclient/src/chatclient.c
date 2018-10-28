@@ -102,7 +102,7 @@ int main(int argc, char **argv)
   memset((char*)&serverAddress, '\0', sizeof(serverAddress));
   serverAddress.sin_family = AF_INET;
   serverAddress.sin_port = htons(port);
-  serverHostInfo = gethostbyname(hostname);
+  serverHostInfo = gethostbyname(argv[1]);
 
   if (serverHostInfo == NULL) error("ERROR, no such host",1);
 
