@@ -16,6 +16,9 @@
 #define HANDLEMAX 10	// max length of handles
 #define BUFFERMAX 300	// max length of string buffer
 
+// bool type defined as true/false logic is used extensively
+typedef enum {false, true} bool;
+
 /************************************************
  * NAME
  *   error
@@ -56,7 +59,7 @@ void get_handle(char* handle)
   int max = HANDLEMAX;
   char *input;
   char prompt_str[] = "Enter handle";
-  int valid_input = 0;
+  bool valid_input = false;
 
   char space_str[] = " ";
 
@@ -68,12 +71,12 @@ void get_handle(char* handle)
 	  error("Unable to allocate (get_handle)", 1);
 
   // until a valid input is received...
-  while (valid_input == 0)
+  while (valid_input == false)
   {
     get_input(prompt_str, input);
 
     if ((strstr(input, space_str) == NULL) && (strlen(input) > 0) && (strlen(input) <= max))
-      valid_input = 1;
+      valid_input = true;
     else
       printf("Handle must be 1-%d characters with no spaces.\n", max);
   }
@@ -99,6 +102,7 @@ int main(int argc, char **argv)
   char buffer[BUFFERMAX+1];
   char message[HANDLEMAX+BUFFERMAX+3];
   char close_cmd[] = "\\quit";
+  bool quit = false;
 
   buffer[0] = '\0';
 
@@ -133,26 +137,33 @@ int main(int argc, char **argv)
   if (connect(socketFD, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0)
 	  error("ERROR connecting", 1);
 
-  while (strcmp(buffer, close_cmd) != 0)
+  while (quit == false)
   {
 	get_input(handle, buffer);
 
-    message[0] = '\0';
-    strcat(message, handle);
-    strcat(message, "> ");
-    strcat(message, buffer);
+	if (strcmp(buffer, close_cmd) == 0)
+	  quit = true;
 
-    // send message to server
-    charsWritten = send(socketFD, message, strlen(message), 0);
-    if (charsWritten < 0) error("ERROR writing to socket", 1);
-    if (charsWritten < strlen(message)) printf("WARNING: Not all data written to socket.\n");
+	else
+	{
+	  message[0] = '\0';
+      strcat(message, handle);
+      strcat(message, "> ");
+      strcat(message, buffer);
 
-    //get return message from server
-    memset(message, '\0', sizeof(message));
-    charsRead = recv(socketFD, message, sizeof(message)-1, 0);
-    if (charsRead < 0) error ("ERROR reading from socket", 1);
+      // send message to server
+      charsWritten = send(socketFD, message, strlen(message), 0);
+      if (charsWritten < 0) error("ERROR writing to socket", 1);
+      if (charsWritten < strlen(message)) printf("WARNING: Not all data written to socket.\n");
 
-    printf("%s\n", message);
+      //get return message from server
+      memset(message, '\0', sizeof(message));
+      charsRead = recv(socketFD, message, sizeof(message)-1, 0);
+      if (charsRead < 0) error ("ERROR reading from socket", 1);
+
+      printf("%s\n", message);
+
+	}
   }
 
   close(socketFD);
