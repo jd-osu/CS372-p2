@@ -257,9 +257,12 @@ int main(int argc, char **argv)
 			if (charsRead < 0) error ("ERROR reading from socket",1);
 
 			if(strcmp(message, notice) == 0)
+			{
 				send(socketFD, ack, strlen(ack), 0);
-			else
-				printf("%s\n", message);
+				charsRead = recv(socketFD, message, sizeof(message)-1, 0);
+			}
+
+			printf("%s\n", message);
 		}
 		else
 			conn_good = false;
