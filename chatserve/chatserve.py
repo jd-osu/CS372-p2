@@ -37,19 +37,27 @@ while 1:
         total_read = 0
         in_msg = ""
         
+        stop = False
      
-        while total_read < size :
+        while stop == False :
             temp = connectionSocket.recv(1024)
-            total_read += len(temp)
+            print "read ", len(temp), " bytes"
+            print "temp= ", temp
+            for i in range(0, len(temp)-1):
+                if temp[i] == 4 :
+                    stop = True
+                    temp[i] = '\0'
+                    break
             in_msg = in_msg + temp
-            print "total read=", total_read
-            print "size=", size
-        
+            total_read += len(temp)
+            print "in_msg= ", in_msg
+            print "total_read= ", total_read
+  
         in_msg_length = len(in_msg)
         
         if in_msg_length != 0 :
             print in_msg
-            out_msg = raw_input(handle+": ")
+            out_msg = raw_input(handle+": "+4)
             connectionSocket.send(handle + "> " + out_msg)
 
     print "connection was closed."

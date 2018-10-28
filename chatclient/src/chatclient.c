@@ -15,6 +15,7 @@
 
 #define HANDLEMAX 10	// max length of handles
 #define BUFFERMAX 300	// max length of string buffer
+#define TX_LIMIT 1000
 
 // bool type defined as true/false logic is used extensively
 typedef enum {false, true} bool;
@@ -141,6 +142,136 @@ int send_message(int socket, char *buf)
   return 0;
 }
 
+/************************************************
+ * NAME
+ *   read_socket
+ * DESCRIPTION
+ *   This program takes as an argument an int
+ *   representing a file descriptor for a socket
+ *   to which a connection has been established.
+ *   It then reads data from the socket (sent by
+ *   the counterpart client program) [TX_LIMIT]
+ *   bytes at a time until it encounters the
+ *   terminating character "EOT". The read string
+ *   is then returned.
+ * *********************************************/
+char *read_socket(int socket)
+{
+  int charsRead, charsWritten;
+  char *text = NULL;
+  int cap;
+  int len = 0;
+  bool stop = false;
+  char buffer[TX_LIMIT];
+  int cur_idx = 0;
+
+  // clear buffer
+  memset(buffer, 0, sizeof(buffer));
+
+  // initialize text
+  text = malloc(1);
+  text[0] = '\0';
+
+  while (stop == false)
+  {
+    // read up to TX_LIMIT
+    charsRead = recv(socket, buffer, sizeof(buffer), 0);
+    if (charsRead < 0)
+      error("CLIENT(enc): ERROR reading from socket", 1);
+
+    else if (charsRead != 0)
+    {
+      // update the string length
+      len += charsRead;
+
+      // allocate or reallocate the plaintext string
+      cap = (len + 1) * sizeof(char);
+      text = realloc(text, cap);
+      if (text == NULL)
+        error("CLIENT(enc): Could not allocate memory", 1);
+
+      // copy received text to text string
+      int i;
+      for (i = 0; i < TX_LIMIT; i++)
+      {
+        text[cur_idx] = buffer[i];
+
+        if (text[cur_idx] == 4)
+        {
+          stop = true;
+          text[cur_idx] = '\0';
+        }
+
+        cur_idx++;
+      }
+
+      text[len] = '\0';
+    }
+
+    // clear buffer for next read
+    memset(buffer, 0, sizeof(buffer));
+  }
+
+  return text;
+}
+
+/************************************************
+ * NAME
+ *   write_socket
+ * DESCRIPTION
+ *   This function takes as an argument an int
+ *   representing a socket with which a connection
+ *   has been established and a string and writes
+ *   the string to the socket [TX_LIMIT] bytes
+ *   at a time until the entire string was sent.
+ * *********************************************/
+void *write_socket(int socket, const char *text)
+{
+  int charsWritten, cap, chunk = 0, totalWritten = 0;
+  char term[] = 4;
+  char *out_str = NULL;
+  char buffer[TX_LIMIT];
+  int cur_idx = 0;
+
+  cap = strlen(text) + 2;
+
+  out_str = malloc(cap * sizeof(char));
+  if (out_str == NULL)
+    error("Could not allocate memory", 1);
+  memset(out_str, 0, cap * sizeof(char));
+
+  // build the output string by appending term char to text
+  strcpy(out_str, text);
+  strcat(out_str, term);
+
+  while (totalWritten < cap)
+  {
+    // clear buffer
+    memset(buffer, 0, TX_LIMIT * sizeof(char));
+
+    // fill the buffer with the next set of chars
+    int i;
+    for (i = 0; i < TX_LIMIT; i++)
+    {
+      if (cur_idx < strlen(out_str))
+        buffer[i] = out_str[cur_idx];
+      else
+        buffer[i] = '\0';
+
+      cur_idx++;
+    }
+
+    // send buffer
+    charsWritten = send(socket, buffer, sizeof(buffer), 0);
+    if (charsWritten < 0)
+      error("CLIENT(enc): ERROR writing to socket", 1);
+
+    totalWritten += charsWritten;
+  }
+
+  free(out_str);
+}
+
 int main(int argc, char **argv)
 {
   // if wrong number of arguments entered
@@ -206,12 +337,11 @@ int main(int argc, char **argv)
       strcat(message, "> ");
       strcat(message, buffer);
 
-      send_message(socketFD, message);
+      write_socket(socketFD, message);
 
       //get return message from server
       memset(message, '\0', sizeof(message));
-      charsRead = recv(socketFD, message, sizeof(message)-1, 0);
-      if (charsRead < 0) error ("ERROR reading from socket", 1);
+      message = read_socket(socketFD);
 
       printf("%s\n", message);
 
