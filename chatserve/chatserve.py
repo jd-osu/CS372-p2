@@ -83,6 +83,6 @@ while 1:
     print "connection was closed."
     
 
-#    connectionSocket.close()
+    connectionSocket.close()
 
 
