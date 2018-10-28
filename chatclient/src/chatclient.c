@@ -213,7 +213,7 @@ char *read_socket(int socket, char* msg)
   }
 
   strcpy(msg, text);
-  free(text);
+//  free(text);
 }
 
 /************************************************
