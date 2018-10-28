@@ -170,7 +170,7 @@ int main(int argc, char **argv)
 
 	else
 	{
-	  message[0] = '\0';
+	  memset(message, '\0', sizeof(message));
       strcat(message, handle);
       strcat(message, "> ");
       strcat(message, buffer);
