@@ -75,6 +75,7 @@ while 1:
                     out_msg = handle + "> " + input
          
                     if get_ack(connectionSocket) :
+                        print "sending message: ", out_msg
                         connectionSocket.sendall(out_msg)
                     else:
                         conn_good = False
