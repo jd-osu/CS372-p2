@@ -116,7 +116,7 @@ int send_message(int socket, char *buf)
   int buf_len = strlen(buf);
   char buf_len_str [5];
   char ack_str[5];
-  char ok = "OK";
+  char ok[] = "OK";
   sprintf(buf_len_str, "%d", buf_len);
 
   send(socket, buf_len_str, strlen(buf_len_str), 0);
@@ -124,7 +124,7 @@ int send_message(int socket, char *buf)
   //get ack message from server
   memset(ack_str, '\0', sizeof(ack_str));
   int ackRead = recv(socket, ack_str, sizeof(ack_str)-1, 0);
-  if (ackRead < 0) error ("ERROR reading from socket", 1)
+  if (ackRead < 0) error ("ERROR reading from socket", 1);
 
   if (strcmp(ack_str, ok) == 0)
   {
@@ -206,7 +206,7 @@ int main(int argc, char **argv)
       strcat(message, "> ");
       strcat(message, buffer);
 
-
+      send_message(socketFD, message);
 
       //get return message from server
       memset(message, '\0', sizeof(message));
