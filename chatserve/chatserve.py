@@ -43,10 +43,10 @@ while 1:
                     stop = True
                     temp[i] = '\0'
                     break
-                in_msg = in_msg + temp
-                total_read += len(temp)
-                print "in_msg= ", in_msg
-                print "total_read= ", total_read
+            in_msg = in_msg + temp
+            total_read += len(temp)
+            print "in_msg= ", in_msg
+            print "total_read= ", total_read
   
         in_msg_length = len(in_msg)
         
