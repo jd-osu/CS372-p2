@@ -14,7 +14,7 @@
 #include <netdb.h>
 
 #define HANDLEMAX 10	// max length of handles
-#define MESSAGEMAX 500  // max length of messages
+#define MESSAGEMAX 500  // max length of message text
 #define BUFFERMAX 1000	// max length of string buffer
 
 // bool type defined as true/false logic is used extensively
@@ -100,7 +100,7 @@ void get_handle(char* handle)
  * DESCRIPTION
  *
  * *********************************************/
-void get_message_input(char* msg, char* handle)
+bool get_message_input(char* msg, char* handle)
 {
   int max = MESSAGEMAX;
   bool valid_input = false;
@@ -121,13 +121,14 @@ void get_message_input(char* msg, char* handle)
       printf("Message must be 1-%d characters.\n", max);
   }
 
-  if (strcmp(buffer, close_cmd) != 0)
-  {
-	strcat(msg, handle);
-	strcat(msg, "> ");
-  }
+  if (strcmp(buffer, close_cmd) == 0)
+	  return false;
 
+  strcat(msg, handle);
+  strcat(msg, "> ");
   strcat(msg, buffer);
+
+  return true;
 }
 
 /*
@@ -168,20 +169,13 @@ int main(int argc, char **argv)
   int port = atoi(argv[2]);
   char handle[HANDLEMAX+1];
   char message[HANDLEMAX+MESSAGEMAX+4];
-  bool quit = false;
-  int len;
-  char close_cmd[] = "\\quit";
 
   get_handle(handle);
-
-  //printf("Handle is: %s\n", handle);
-  //printf("Hostname is: %s\n", hostname);
-  //printf("Port is: %d\n", port);
 
   /* The following code was adapted from CS344, Lecture 4.2, slide 21
    * "client.c"
    */
-  int socketFD, charsWritten, charsRead;
+  int socketFD, charsRead;
 
   struct sockaddr_in serverAddress;
   struct hostent* serverHostInfo;
@@ -203,9 +197,9 @@ int main(int argc, char **argv)
   if (connect(socketFD, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0)
 	  error("ERROR connecting", 1);
 
-  get_message_input(message, handle);
+  ;
 
-  while (strcmp(message, close_cmd) != 0)
+  while (get_message_input(message, handle) == true)
   {
     int msg_len = strlen(message);
 
@@ -218,12 +212,10 @@ int main(int argc, char **argv)
 
     //get return message from server
     memset(message, '\0', sizeof(message));
-    int charsRead = recv(socketFD, message, sizeof(message)-1, 0);
+    charsRead = recv(socketFD, message, sizeof(message)-1, 0);
     if (charsRead < 0) error ("ERROR reading from socket",1);
 
     printf("%s\n", message);
-
-    get_message_input(message, handle);
   }
 
   close(socketFD);
