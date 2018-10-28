@@ -62,13 +62,15 @@ serverSocket.listen(1)
 
 # Listen continuously at the specified port (unless a SIGINT is caught)
 while 1:
-    print "Listening for new connection..."
+    print "Listening for new chat connection..."
     connectionSocket, addr = serverSocket.accept()
 
     #initialize message length, connection status and quit status
     in_msg_length = 1
     conn_good = True
     stop = False
+    
+    print "Chat connection established."
     
     #continue to receive messages while the connection is good and quit is not indicated
     while in_msg_length != 0 and conn_good and not stop:
@@ -104,7 +106,7 @@ while 1:
                     else:
                         conn_good = False
 
-    print "Connection was closed."
+    print "Chat connection was closed."
     
 
     connectionSocket.close()

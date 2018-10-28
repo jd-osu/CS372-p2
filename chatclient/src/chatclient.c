@@ -263,9 +263,13 @@ int main(int argc, char **argv)
   socketFD = socket(AF_INET, SOCK_STREAM, 0);
   if (socketFD < 0) error("ERROR opening socket", 1);
 
+  printf("Connecting to server for new chat connection...\n");
+
   //connect to server
   if (connect(socketFD, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0)
 	  error("ERROR connecting", 1);
+
+  printf("Chat connection established.\n");
 
   // as long as the connection is still good and quit isn't indicated
   while (conn_good == true && get_message_input(message, handle) == true)
@@ -311,7 +315,7 @@ int main(int argc, char **argv)
 
   close(socketFD);
 
-  printf("Connection was closed.\n");
+  printf("Chat connection closed.\n");
 
   return EXIT_SUCCESS;
 }
