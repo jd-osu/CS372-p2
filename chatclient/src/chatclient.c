@@ -210,7 +210,9 @@ int main(int argc, char **argv)
       send_message(socketFD, message);
 
       //get return message from server
-      read_socket(socketFD, message);
+      memset(message, '\0', sizeof(message));
+      int charsRead = recv(socketFD, message, sizeof(message)-1, 0);
+      if (charsRead < 0) error ("ERROR reading from socket",1);
 
       printf("%s\n", message);
 
