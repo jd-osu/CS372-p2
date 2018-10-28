@@ -27,6 +27,7 @@ while 1:
     connectionSocket, addr = serverSocket.accept()
 
     in_msg_length = 1
+    out_msg_length = 1
     
     while in_msg_length != 0 and out_msg_length != 0 :
         in_msg = connectionSocket.recv(1024)
