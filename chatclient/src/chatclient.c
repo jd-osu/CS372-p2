@@ -1,9 +1,14 @@
 /************************************************
- * [program name]
- * Author:
+ * chatclient.c
+ * Author: Jason DiMedio
  * CS372
- * October 27, 2018
- * This program ...
+ * October 28, 2018
+ * This program is a client side component to a chat application
+ * The client side sets up a connection with the server and
+ * sends an initial message. In response to receiving a message
+ * back from the server, the client then prompts the user to
+ * enter a new message. If the connection is lost or the user
+ * selects a quit command, the program ends.
  * *********************************************/
 
 #include <stdio.h>
@@ -17,6 +22,7 @@
 #define MESSAGEMAX 500  // max length of message text
 #define BUFFERMAX 1000	// max length of string buffer
 
+// global constant variables for preparatory messages
 static const char notice[] = "sending";
 static const char ack[] = "OK";
 
@@ -40,9 +46,13 @@ void error(const char *msg, int e)
 
 /************************************************
  * NAME
- *
+ *	get_input
  * DESCRIPTION
- *
+ *	This is a generic function for getting string
+ *	input from the user. It takes a prompt string
+ *	and a pointer to a string to store the value.
+ *	The function also replaces any terminating
+ *	newline with a null character.
  * *********************************************/
 void get_input(char* prompt, char* in)
 {
@@ -60,9 +70,13 @@ void get_input(char* prompt, char* in)
 
 /************************************************
  * NAME
- *
+ *	get_handle
  * DESCRIPTION
- *
+ *	This function takes a string pointer as an argument
+ *	and stores a value input by the user based on
+ *	a hardcoded prompt specific to obtaining the
+ *	handle. The value is first validated to ensure
+ *	it is 1-10 characters with no spaces.
  * *********************************************/
 void get_handle(char* handle)
 {
@@ -85,6 +99,7 @@ void get_handle(char* handle)
   {
     get_input(prompt_str, input);
 
+    // if the input is one word and between 1-10 characters it is valid
     if ((strstr(input, space_str) == NULL) && (strlen(input) > 0) && (strlen(input) <= max))
       valid_input = true;
     else
@@ -99,9 +114,15 @@ void get_handle(char* handle)
 
 /************************************************
  * NAME
- *
+ *	get_message_input
  * DESCRIPTION
- *
+ *	This function takes a string pointer as an argument
+ *	and stores a value input by the user based on
+ *	a prompt (specifically the user handle) passed as an
+ *	argument. The value is first validated to ensure
+ *	it is 1-500 characters with no spaces. Additionally,
+ *	the function returns false if the "quit" command word
+ *	is received as input.
  * *********************************************/
 bool get_message_input(char* msg, char* handle)
 {
@@ -134,9 +155,16 @@ bool get_message_input(char* msg, char* handle)
   return true;
 }
 
-/*
-
- */
+/******************************************************
+* NAME
+*    get_ack
+* DESCRIPTION
+*    This function receives a socket as an argument
+*    and exchanges a series of preparatory messages with
+*    the server in order to confirm the connection is
+*    still good. The function returns true if an ack
+*    was received and false otherwise.
+# ***************************************************/
 bool get_ack(int s)
 {
     char ack_in[3];
@@ -154,11 +182,19 @@ bool get_ack(int s)
     return ready;
 }
 
-/*
- * NOTE: This function was adapted from:
- * "Beej's Guide to Network Programming: Using Internet Sockets"
- * http://beej.us/guide/bgnet/html/single/bgnet.html
- */
+/******************************************************
+* NAME
+*    sendall
+* DESCRIPTION
+*    This function receives a socket, a string message
+*    and a pointer to an int containing the string length
+*    as arguments and continues sending portions of the
+*    message until the entire message was sent.
+*
+* NOTE: This function was adapted from:
+* "Beej's Guide to Network Programming: Using Internet Sockets"
+* http://beej.us/guide/bgnet/html/single/bgnet.html
+****************************************************/
 int sendall(int s, char *buf, int *len)
 {
     int total = 0;        // how many bytes we've sent
@@ -188,11 +224,9 @@ int sendall(int s, char *buf, int *len)
     return ret;
 }
 
-
-
 int main(int argc, char **argv)
 {
-  // if wrong number of arguments entered
+  // Make sure there are at least 2 command line arguments
   if (argc < 3)
   {
     fprintf(stderr, "USAGE: %s hostname port\n", argv[0]);
@@ -207,7 +241,8 @@ int main(int argc, char **argv)
 
   get_handle(handle);
 
-  /* The following code was adapted from CS344, Lecture 4.2, slide 21
+  /* Configure the socket
+   * The following code was adapted from CS344, Lecture 4.2, slide 21
    * "client.c"
    */
   int socketFD;
@@ -225,7 +260,6 @@ int main(int argc, char **argv)
 
   memcpy((char*)&serverAddress.sin_addr.s_addr, (char*)serverHostInfo->h_addr, serverHostInfo->h_length);
 
-  //set up the socket
   socketFD = socket(AF_INET, SOCK_STREAM, 0);
   if (socketFD < 0) error("ERROR opening socket", 1);
 
@@ -233,47 +267,46 @@ int main(int argc, char **argv)
   if (connect(socketFD, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0)
 	  error("ERROR connecting", 1);
 
-  ;
-
-  while (conn_good == true)
+  // as long as the connection is still good and quit isn't indicated
+  while (conn_good == true && get_message_input(message, handle) == true)
   {
-	  while (conn_good == true && get_message_input(message, handle) == true)
-	  {
-		int msg_len = strlen(message);
-		int msg_sent;
+	  int msg_len = strlen(message);
+	  int msg_sent;
 
-		// send message to server
-		// This code was adapted from "Beej's Guide to Network Programming"
-		// (See sendall() function above for more information
-		msg_sent = sendall(socketFD, message, &msg_len);
+	  // send message to server
+	  msg_sent = sendall(socketFD, message, &msg_len);
 
-		if (msg_sent < 0)
+	  // if there was an error during sending
+	  if (msg_sent < 0)
 		  error("ERROR writing to socket", 1);
-		else if (msg_sent > 0)
-		{
-			//get return message from server
-			memset(message, '\0', sizeof(message));
-			charsRead = recv(socketFD, message, sizeof(message)-1, 0);
+	  // sent successfully
+	  else if (msg_sent > 0)
+	  {
+		  //get return message from server
+		  memset(message, '\0', sizeof(message));
+		  charsRead = recv(socketFD, message, sizeof(message)-1, 0);
 
-			if(strcmp(message, notice) == 0)
-			{
-				send(socketFD, ack, strlen(ack), 0);
-				memset(message, '\0', sizeof(message));
-				charsRead = recv(socketFD, message, sizeof(message)-1, 0);
-			}
+		  // if incoming message is a "sending" indicator, reply with ack
+		  if(strcmp(message, notice) == 0)
+		  {
+			  send(socketFD, ack, strlen(ack), 0);
+			  memset(message, '\0', sizeof(message));
+			  charsRead = recv(socketFD, message, sizeof(message)-1, 0);
+		  }
 
-			if (charsRead < 0) error ("ERROR reading from socket",1);
-			else if (charsRead == 0)
-				conn_good = false;
-			else
-				printf("%s\n", message);
-		}
-		else
-			conn_good = false;
+		  // if there was an error reading
+		  if (charsRead < 0) error ("ERROR reading from socket",1);
 
+		  // if the connection is closed
+		  else if (charsRead == 0)
+			  conn_good = false;
+
+		  // if the message was received, display it
+		  else
+			  printf("%s\n", message);
 	  }
-
-	  conn_good = false;
+	  else
+		  conn_good = false;
   }
 
   close(socketFD);
