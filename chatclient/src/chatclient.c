@@ -14,8 +14,7 @@
 #include <netdb.h>
 
 #define HANDLEMAX 10	// max length of handles
-#define BUFFERMAX 300	// max length of string buffer
-#define TX_LIMIT 1000
+#define BUFFERMAX 500	// max length of string buffer
 
 // bool type defined as true/false logic is used extensively
 typedef enum {false, true} bool;
