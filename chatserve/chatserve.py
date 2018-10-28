@@ -28,7 +28,8 @@ def get_ack(socket):
         print "ack_in=", ack_in
         if ack_in == ack :
             ready = True
-            
+    
+    print "ready=", ready        
     return ready
 
 if (len(sys.argv) < 2) : 
@@ -72,7 +73,7 @@ while 1:
                     stop = True
                 else:                
                     out_msg = handle + "> " + input
-                
+         
                     if get_ack(connectionSocket) :
                         connectionSocket.sendall(out_msg)
                     else:
