@@ -141,6 +141,58 @@ char *read_file(const char *filename)
   return text;
 }
 
+/************************************************
+ * NAME
+ *   send_directory
+ * DESCRIPTION
+ *
+ *NOTE: The main part of this function was adapted from:
+ *"How to list files in a directory in a C program?"
+ * https://stackoverflow.com/questions/4204666/how-to-list-files-in-a-directory-in-a-c-program
+ * *********************************************/
+void send_directory(int s, char *filename)
+{
+  char error_text[100];
+  char *text = NULL;
+  int c;
+  int cap, len;
+    
+  // allocate memory for string and clear it
+  cap = 100 * sizeof(char);
+  text = malloc(cap);
+  if (text == NULL)
+    error("Could not allocate memory", 1);
+  
+  DIR *d;
+  
+  int i = 0;
+    
+  struct dirent *dir;
+  d = opendir(".");
+  if (d) {
+    while ((dir = readdir(d)) != NULL) {
+		i = i + strlen(dir->d_name);
+		
+		// check if enough memory is allocated and reallocate if necessary
+		if (i >= (cap - 1))
+		{
+			cap = 100 * cap;
+			text = realloc(text, cap);
+			if (text == NULL)
+				error("Could not allocate memory", 1);
+		}
+		
+		sprintf(text,"%s\n", dir->d_name);
+	}
+	
+	closedir(d);
+  }
+
+  printf(Directory text:\n%s", text);
+
+  free(text);
+}
+
 /******************************************************
 * NAME
 *    send_file
@@ -183,7 +235,10 @@ void process_command(char* command, char* response, int port)
   cmd_substr[2] = '\0';
   
   if (strcmp(cmd_substr, list) == 0)
+  {
+	
     strcpy(response, file_dir);
+  }
   else if (strcmp(cmd_substr, get) == 0)
   {
 	char filename_substr[100];
