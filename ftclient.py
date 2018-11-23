@@ -55,11 +55,17 @@ clientSocket.connect((server_host, server_port))
 
 print "Connection established with " + str(clientSocket.getpeername())
 
+clientSocket.send(data_port)
+
+response = clientSocket.recv(1024)
+
+print "1. Response from server: " + response
+
 clientSocket.send(command)
 
 response = clientSocket.recv(1024)
 
-print "Response from server: " + response
+print "2. Response from server: " + response
 
 clientSocket.close()
 
