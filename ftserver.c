@@ -19,6 +19,10 @@
 #define MESSAGEMAX 500  // max length of message text
 #define BUFFERMAX 1000	// max length of string buffer
 
+#define SERVERSOURCE "ftserver.c"
+#define SERVEREXEC "ftserver"
+#define CLIENTSOURCE "ftclient.py"
+
 // bool type defined as true/false logic is used extensively
 typedef enum {false, true} bool;
 
@@ -153,6 +157,9 @@ char *read_file(const char *filename)
  * *********************************************/
 void send_directory(int port, char *address)
 {
+  static const char server_src_txt[] = SERVERSOURCE;
+  static const char server_exc_txt[] = SERVEREXEC;
+  static const char client_src_txt[] = CLIENTSOURCE;
   char error_text[100];
   char *text = NULL;
   int c;
@@ -176,11 +183,15 @@ void send_directory(int port, char *address)
     while ((dir = readdir(d)) != NULL) {
 		
 		//ignore source code files and directories
-		if (dir->d_type == DT_REG)
+		if ((dir->d_type == DT_REG) &&
+			(strcmp(dir->d_name, server_src_txt) != 0) &&
+			(strcmp(dir->d_name, server_exc_txt) != 0) &&
+			(strcmp(dir->d_name, client_src_txt) != 0) )
 		{
 			i = i + strlen(dir->d_name);
 			printf("dir->d_name=%s\n", dir->d_name);
 			printf("dir->d_name length=%d\n", strlen(dir->d_name));
+			printf("total length=%d\n", i);
 		}
 		
 		// check if enough memory is allocated and reallocate if necessary
@@ -192,7 +203,7 @@ void send_directory(int port, char *address)
 				error("Could not allocate memory", 1);
 		}
 		
-		strcat(text, dir->d_name);
+		//strcat(text, dir->d_name);
 		//strcat(text, "\n");
 	}
 	
