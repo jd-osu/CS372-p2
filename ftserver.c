@@ -260,9 +260,13 @@ int main(int argc, char **argv)
   
   //accept connection
   sizeOfClientInfo = sizeof(clientAddress);
-  establishedConnectionFD = accept (listenSocketFD, (struct sockaddr *)&clientAddress, &sizeOfClientInfo);
+  establishedConnectionFD = accept(listenSocketFD, (struct sockaddr *)&clientAddress, &sizeOfClientInfo);
   if (establishedConnectionFD < 0) error("ERROR on accept", 1);
   
+  // The following line of code (inet_ntoa in particular) adapted from:
+  // "How to get ip address from sock structure in c?"
+  // https://stackoverflow.com/questions/3060950/how-to-get-ip-address-from-sock-structure-in-c
+  printf("Connection from %s\n", inet_ntoa(clientAddress.sin_addr));
   
   close(listenSocketFD);
   
