@@ -229,6 +229,37 @@ int main(int argc, char **argv)
   }
 
   int port = atoi(argv[1]);
+    
+  /* Configure the socket
+   * The following code was adapted from CS344, Lecture 4.3, slide 16
+   * "server.c"
+   */
+  int listenSocketFD, establishedConnectionFD, portNumber, charsRead;
+  socklen_t sizeOfClientInfo;
+  char buffer[256];
+  struct sockaddr_in serverAddress, clientAddress;
+  
+  // set up address struct for server
+  memset((char *)&serverAddress, '\0', sizeof(serverAddress);
+  
+  //create socket
+  serverAddress.sin_family = AF_INET;
+  serverAddress.sin_port = htons(port);
+  serverAddress.sin_addr.s_addr = INADDR_ANY;
+  
+  //set up socket
+  listenSocketFD = socket(AF_INET, SOCK_STREAM, 0);
+  if (listenSocketFD < 0) error("ERROR opening socket", 1);
+  
+  // Listen for connection
+  if (bind(listenSocketFD, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0)
+	  error("ERROR binding", 1);
+  listen(listenSocketFD, 5);
+  
+  printf("Server open on %d\n", port);
+  
+  
+  return EXIT_SUCCESS;
   
   
   /*
@@ -315,8 +346,4 @@ int main(int argc, char **argv)
   printf("Chat connection closed.\n");
 
   */
-  
-  printf("Port is %d\n", port);
-  
-  return EXIT_SUCCESS;
 }
