@@ -55,7 +55,7 @@ clientSocket.connect((server_host, server_port))
 
 print "Connection established with " + str(clientSocket.getpeername())
 
-clientSocket.send(data_port)
+clientSocket.send(str(data_port))
 
 response = clientSocket.recv(1024)
 
