@@ -25,7 +25,12 @@ if (len(sys.argv) >= 6) :
     data_port = sys.argv[5]
 else :
     data_port = sys.argv[4]
-    
+
+print "server_host= " + server_host
+print "server_port= " + server_port
+print "command= " + command
+print "data_port= " + data_port
+
 if (not(server_port.isdigit) or
     not(data_port.isdigit) or
     server_port < 1024 or
@@ -35,11 +40,6 @@ if (not(server_port.isdigit) or
     print "Invalid port. Port must be integer in range: 1024-65535"
     print USAGE
     exit(1)
-
-print "server_host= " + server_host
-print "server_port= " + server_port
-print "command= " + command
-print "data_port= " + data_port
 
 
 """
