@@ -266,7 +266,7 @@ int main(int argc, char **argv)
   // The following line of code (inet_ntoa in particular) adapted from:
   // "How to get ip address from sock structure in c?"
   // https://stackoverflow.com/questions/3060950/how-to-get-ip-address-from-sock-structure-in-c
-  //printf("Connection from %s\n", inet_ntoa(clientAddress.sin_addr));
+  printf("Connection from %s\n", inet_ntoa(clientAddress.sin_addr));
   
   memset(buffer, '\0', 256);
   charsRead = recv(establishedConnectionFD, buffer, 255, 0);
