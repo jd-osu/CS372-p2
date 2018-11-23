@@ -14,15 +14,22 @@ if (len(sys.argv) < 5) :
     print "USAGE: ", str(sys.argv[0]), " [server host] [server port] [command + filename(optional)] [data port]"
     exit(1)
 
-server_host = sys.argv[1]
-server_port = sys.argv[2]
-command = sys.argv[3]
+server_host = str(sys.argv[1])
+server_port = int(sys.argv[2])
+command = str(sys.argv[3])
 
 if (len(sys.argv) >= 6) :
-    command = str(command) + " " + str(sys.argv[4])
-    data_port = sys.argv[5]
+    command = command + " " + str(sys.argv[4])
+    data_port = int(sys.argv[5])
 else :
-    data_port = sys.argv[4]
+    data_port = int(sys.argv[4])
+    
+if (server_port < 1024 or
+    server_port > 1024 or
+    data_port < 1024 or
+    data_port > 65535) :
+    print("Invalid port. Valid range: 1024-65535")
+    exit(1)
 
 print "server_host= " + server_host
 print "server_port= " + server_port
