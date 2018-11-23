@@ -31,8 +31,8 @@ print "server_port= " + server_port
 print "command= " + command
 print "data_port= " + data_port
 
-print "server_port.isdigit="+server_port.isdigit()
-print "data_port.isdigit="+data_port.isdigit()
+print "server_port.isdigit="+ str(server_port.isdigit())
+print "data_port.isdigit="+ str(data_port.isdigit())
 
 if (not(server_port.isdigit()) or
     not(data_port.isdigit()) or
