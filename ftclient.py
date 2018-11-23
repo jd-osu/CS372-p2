@@ -14,10 +14,10 @@ if (len(sys.argv) < 5) :
     print "USAGE: ", str(sys.argv[0]), " [server host] [server port] [command + filename(optional)] [data port]"
     exit(1)
 
-    server_host = sys.argv[1]
-    server_port = sys.argv[2]
-    command = sys.argv[3]
-    data_port = sys.argv[len(sys.argv)-1]
+server_host = sys.argv[1]
+server_port = sys.argv[2]
+command = sys.argv[3]
+data_port = sys.argv[len(sys.argv)-1]
 
 if (len(sys.argv) >= 6) :
     command = str(command) + " " + str(sys.argv[4])
