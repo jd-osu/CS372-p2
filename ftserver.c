@@ -18,6 +18,10 @@
 #define MESSAGEMAX 500  // max length of message text
 #define BUFFERMAX 1000	// max length of string buffer
 
+// global constant variables for preparatory messages
+static const char notice[] = "sending";
+static const char ack[] = "OK";
+
 // bool type defined as true/false logic is used extensively
 typedef enum {false, true} bool;
 
