@@ -10,13 +10,23 @@ from socket import *
 import signal
 
 # Make sure there are at least one command line argument
-if (len(sys.argv) < 2) : 
-    print "USAGE: ", str(sys.argv[0]), " <SERVER_HOST> <SERVER_PORT> <COMMAND> <FILENAME> (if applicable) <DATA_PORT>"
+if (len(sys.argv) < 5) : 
+    print "USAGE: ", str(sys.argv[0]), " <SERVER HOST> <SERVER PORT> <COMMAND> <FILENAME>(optional) <DATA PORT>"
     exit(1)
 
-port = int(sys.argv[1])
+    server_host = sys.argv[1]
+    server_port = sys.argv[2]
+    command = sys.argv[3]
+    data_port = sys.argv[len(sys.argv)-1]
 
-print "Port is " + port
+if (len(sys.argv) >= 6) :
+    command = str(command) + " " + str(sys.argv[4])
+
+print "server_host= " + server_host
+print "server_port= " + server_port
+print "command= " + command
+print "data_port= " + data_port
+
 
 """
 notice = "sending"
