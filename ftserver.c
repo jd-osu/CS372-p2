@@ -186,7 +186,7 @@ void send_directory(int port, char *address)
 		}
 		
 		strcat(text, dir->d_name);
-		strcat(text, "\n");
+		//strcat(text, "\n");
 	}
 	
 	closedir(d);
