@@ -11,7 +11,7 @@ import signal
 
 # Make sure there are at least one command line argument
 if (len(sys.argv) < 5) : 
-    print "USAGE: ", str(sys.argv[0]), " <SERVER HOST> <SERVER PORT> <COMMAND> <FILENAME>(optional) <DATA PORT>"
+    print "USAGE: ", str(sys.argv[0]), " [server host] [server port] [command + filename(optional)] [data port]"
     exit(1)
 
     server_host = sys.argv[1]

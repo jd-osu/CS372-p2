@@ -224,7 +224,7 @@ int main(int argc, char **argv)
   // Make sure there is at least 1 command line argument
   if (argc < 2)
   {
-    fprintf(stderr, "USAGE: %s <SERVER_PORT>\n", argv[0]);
+    fprintf(stderr, "USAGE: %s [server port]\n", argv[0]);
     exit(1);
   }
 
