@@ -163,6 +163,8 @@ void send_directory(int port, char *address)
   text = malloc(cap);
   if (text == NULL)
     error("Could not allocate memory", 1);
+  memset(text, '\0', 100);
+
   
   DIR *d;
   
@@ -183,7 +185,8 @@ void send_directory(int port, char *address)
 				error("Could not allocate memory", 1);
 		}
 		
-		sprintf(text,"%s\n", dir->d_name);
+		strcat(text, dir->d_name);
+		strcat(text, "\n");
 	}
 	
 	closedir(d);
