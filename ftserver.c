@@ -231,18 +231,30 @@ void process_command(char* command, char* response)
   static const char get_res[] = "[getting file!]";
   static const char invalid_cmd[] = "Invalid command!
   
+  char buffer[1000];
+  
   // The following code for getting the command substring was adapted from:
   // "Get a substring of a char* [duplicate]"
   // https://stackoverflow.com/questions/4214314/get-a-substring-of-a-char
   char cmd_substr[3];
   memcpy(cmd_substr, &command[0], 2);
   cmd_substr[2] = '\0';
-
+  
   if (strcmp(cmd_substr, list) == 0)
     strcpy(response, file_dir);
-  else if (strcmp(cmd_substr, get)
+  else if (strcmp(cmd_substr, get) == 0)
   {
-    strcpy(response, get_res);
+	char filename_substr[100];
+	
+	if (strlen(command) > 3 && command[2] == " ")
+	{
+      memcpy(filename_substr, &command[3], strlen(command)-3);
+      filename_substr[strlen(command)-3] = '\0';
+	  
+	      strcpy(response, get_res);
+	}
+	else
+      strcpy(response, invalid_cmd);
   }
   else
     strcpy(response, invalid_cmd);
