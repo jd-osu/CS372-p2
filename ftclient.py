@@ -44,9 +44,7 @@ print "server_port > 65535="+str(server_port > 65535)
 print "data_port < 1024="+str(data_port < 1024)
 print "data_port > 65535="+str(data_port > 65535)
 
-print "all together=" + str(not(server_port.isdigit()) or not(data_port.isdigit()) or server_port < 1024 or server_port > 65535 or data_port < 1024 or data_port > 65535)
-
-if (not(server_port.isdigit()) or not(data_port.isdigit()) or server_port < 1024 or server_port > 65535 or data_port < 1024 or data_port > 65535) :
+if (server_port < 1024 or server_port > 65535 or data_port < 1024 or data_port > 65535) :
     print "INVALID INPUT: Port must be in range 1024-65535"
     print USAGE
     exit(1)
