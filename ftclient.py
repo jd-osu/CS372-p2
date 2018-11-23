@@ -9,6 +9,16 @@ import sys
 from socket import *
 import signal
 
+# Make sure there are at least one command line argument
+if (len(sys.argv) < 2) : 
+    print "USAGE: ", str(sys.argv[0]), " <SERVER_HOST> <SERVER_PORT> <COMMAND> <FILENAME> (if applicable) <DATA_PORT>"
+    exit(1)
+
+port = int(sys.argv[1])
+
+print "Port is " + port
+
+"""
 notice = "sending"
 ack = "OK"
 quit_cmd = "\\quit"
@@ -43,12 +53,9 @@ def get_ack(socket):
             
     return ready
 
-# Make sure there is at least one command line argument
-if (len(sys.argv) < 2) : 
-    print "USAGE: ", str(sys.argv[0]), " port"
-    exit(1)
 
-port = int(sys.argv[1])
+
+
 
 # Configure the socket
 # The following code has been adapted from CS372, Lecture 15, slide 9
@@ -108,4 +115,5 @@ while 1:
 
     connectionSocket.close()
 
+"""
 
