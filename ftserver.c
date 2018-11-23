@@ -189,7 +189,7 @@ void send_directory(int s, char *filename)
 	closedir(d);
   }
 
-  printf(Directory text:\n%s", text);
+  printf("Directory text:\n%s", text);
 
   free(text);
 }
