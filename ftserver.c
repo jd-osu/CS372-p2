@@ -258,6 +258,15 @@ int main(int argc, char **argv)
   
   printf("Server open on %d\n", port);
   
+  //accept connection
+  sizeOfClientInfo = sizeof(clientAddress);
+  establishedConnectionFD = accept (listenSocketFD, (struct sockaddr *)&clientAddress, &sizeOfClientInfo);
+  if (establishedConnectionFD < 0) error("ERROR on accept", 1);
+  
+  
+  close(listenSocketFD);
+  
+  printf("Control connection closed.\n");
   
   return EXIT_SUCCESS;
   
