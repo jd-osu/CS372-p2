@@ -198,10 +198,12 @@ void send_directory(int port, char *address)
 					error("Could not allocate memory", 1);
 			}
 			
-			for (int j=0; j < strlen(dir->d_name); j++)
+			int j;
+			
+			for (j=0; j < strlen(dir->d_name); j++)
 			{
 				text[i] = dir->d_name[j];
-				i++
+				i++;
 			}
 			
 			text[i] = '\n';
