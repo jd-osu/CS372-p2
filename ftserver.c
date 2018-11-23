@@ -12,6 +12,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <arpa/inet.h>
 
 #define HANDLEMAX 10	// max length of handles
 #define MESSAGEMAX 500  // max length of message text
