@@ -303,29 +303,32 @@ int main(int argc, char **argv)
   listen(listenSocketFD, 5);
   
   printf("Server open on %d\n", port);
-  
-  //accept connection
-  sizeOfClientInfo = sizeof(clientAddress);
-  establishedConnectionFD = accept(listenSocketFD, (struct sockaddr *)&clientAddress, &sizeOfClientInfo);
-  if (establishedConnectionFD < 0) error("ERROR on accept", 1);
-  
-  // The following line of code (inet_ntoa in particular) adapted from:
-  // "How to get ip address from sock structure in c?"
-  // https://stackoverflow.com/questions/3060950/how-to-get-ip-address-from-sock-structure-in-c
-  printf("Connection from %s\n", inet_ntoa(clientAddress.sin_addr));
-  
-  memset(buffer, '\0', 256);
-  charsRead = recv(establishedConnectionFD, buffer, 255, 0);
-  if (charsRead < 0) error("ERROR reading from socket", 1);
-  printf("I received this from the client: %s\n", buffer);
-  
-  char response_text[300];
-  process_command(buffer, response_text);
-  
-  charsRead = send(establishedConnectionFD, response_text, strlen(response_text), 0);
-  if (charsRead < 0) error("ERROR writing to socket", 1);
-  
-  close(establishedConnectionFD);
+
+  while(1)
+  {
+	  //accept connection
+	  sizeOfClientInfo = sizeof(clientAddress);
+	  establishedConnectionFD = accept(listenSocketFD, (struct sockaddr *)&clientAddress, &sizeOfClientInfo);
+	  if (establishedConnectionFD < 0) error("ERROR on accept", 1);
+	  
+	  // The following line of code (inet_ntoa in particular) adapted from:
+	  // "How to get ip address from sock structure in c?"
+	  // https://stackoverflow.com/questions/3060950/how-to-get-ip-address-from-sock-structure-in-c
+	  printf("Connection from %s\n", inet_ntoa(clientAddress.sin_addr));
+	  
+	  memset(buffer, '\0', 256);
+	  charsRead = recv(establishedConnectionFD, buffer, 255, 0);
+	  if (charsRead < 0) error("ERROR reading from socket", 1);
+	  printf("I received this from the client: %s\n", buffer);
+	  
+	  char response_text[300];
+	  process_command(buffer, response_text);
+	  
+	  charsRead = send(establishedConnectionFD, response_text, strlen(response_text), 0);
+	  if (charsRead < 0) error("ERROR writing to socket", 1);
+	  
+	  close(establishedConnectionFD);
+  }
   
   close(listenSocketFD);
   
