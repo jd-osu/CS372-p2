@@ -1,14 +1,9 @@
 /************************************************
- * chatclient.c
+ * ftserver.c
  * Author: Jason DiMedio
  * CS372
- * October 28, 2018
- * This program is a client side component to a chat application
- * The client side sets up a connection with the server and
- * sends an initial message. In response to receiving a message
- * back from the server, the client then prompts the user to
- * enter a new message. If the connection is lost or the user
- * selects a quit command, the program ends.
+ * November 25, 2018
+ * [description]
  * *********************************************/
 
 #include <stdio.h>
@@ -78,7 +73,7 @@ void get_input(char* prompt, char* in)
  *	handle. The value is first validated to ensure
  *	it is 1-10 characters with no spaces.
  * *********************************************/
-void get_handle(char* handle)
+void get_handle(char* handle)  // candidate for removal
 {
   int max = HANDLEMAX;
   char *input;
@@ -124,7 +119,7 @@ void get_handle(char* handle)
  *	the function returns false if the "quit" command word
  *	is received as input.
  * *********************************************/
-bool get_message_input(char* msg, char* handle)
+bool get_message_input(char* msg, char* handle)  // candidate for removal
 {
   int max = MESSAGEMAX;
   bool valid_input = false;
@@ -226,15 +221,17 @@ int sendall(int s, char *buf, int *len)
 
 int main(int argc, char **argv)
 {
-  // Make sure there are at least 2 command line arguments
-  if (argc < 3)
+  // Make sure there is at least 1 command line argument
+  if (argc < 2)
   {
-    fprintf(stderr, "USAGE: %s hostname port\n", argv[0]);
+    fprintf(stderr, "USAGE: %s <SERVER_PORT>\n", argv[0]);
     exit(1);
   }
 
-  char *hostname = argv[1];
-  int port = atoi(argv[2]);
+  int port = atoi(argv[1]);
+  
+  
+  /*
   char handle[HANDLEMAX+1];
   char message[HANDLEMAX+MESSAGEMAX+3];
   bool conn_good = true;
@@ -244,7 +241,7 @@ int main(int argc, char **argv)
   /* Configure the socket
    * The following code was adapted from CS344, Lecture 4.2, slide 21
    * "client.c"
-   */
+   *//*
   int socketFD;
   int charsRead = 1;
 
@@ -317,5 +314,9 @@ int main(int argc, char **argv)
 
   printf("Chat connection closed.\n");
 
+  */
+  
+  printf("Port is %d\n", port);
+  
   return EXIT_SUCCESS;
 }
