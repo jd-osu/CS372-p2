@@ -35,9 +35,9 @@ server_port = int(server_port)
 data_port = int(data_port)
 
 print "server_host= " + server_host
-print "server_port= " + server_port
+print "server_port= " + str(server_port)
 print "command= " + command
-print "data_port= " + data_port
+print "data_port= " + str(data_port)
 
 print "server_port < 1024="+str(server_port < 1024)
 print "server_port > 65535="+str(server_port > 65535)
