@@ -22,7 +22,7 @@ if (len(sys.argv) >= 6) :
     command = str(command) + " " + str(sys.argv[4])
     data_port = sys.argv[5]
 else :
-    data_port = sys.arg[4]
+    data_port = sys.argv[4]
 
 print "server_host= " + server_host
 print "server_port= " + server_port
