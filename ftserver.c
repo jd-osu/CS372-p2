@@ -240,7 +240,7 @@ int main(int argc, char **argv)
   struct sockaddr_in serverAddress, clientAddress;
   
   // set up address struct for server
-  memset((char *)&serverAddress, '\0', sizeof(serverAddress);
+  memset((char *)&serverAddress, '\0', sizeof(serverAddress));
   
   //create socket
   serverAddress.sin_family = AF_INET;
