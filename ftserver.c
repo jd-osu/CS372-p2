@@ -229,7 +229,7 @@ void process_command(char* command, char* response)
   static const char get[] = "-g";
   static const char file_dir[] = "[file directory!]";
   static const char get_res[] = "[getting file!]";
-  static const char invalid_cmd[] = "Invalid command!
+  static const char invalid_cmd[] = "Invalid command!";
   
   char buffer[1000];
   
@@ -246,7 +246,7 @@ void process_command(char* command, char* response)
   {
 	char filename_substr[100];
 	
-	if (strlen(command) > 3 && command[2] == " ")
+	if (strlen(command) > 3 && command[2] == ' ')
 	{
       memcpy(filename_substr, &command[3], strlen(command)-3);
       filename_substr[strlen(command)-3] = '\0';
