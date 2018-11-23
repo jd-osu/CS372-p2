@@ -268,6 +268,16 @@ int main(int argc, char **argv)
   // https://stackoverflow.com/questions/3060950/how-to-get-ip-address-from-sock-structure-in-c
   //printf("Connection from %s\n", inet_ntoa(clientAddress.sin_addr));
   
+  memset(buffer, '\0', 256);
+  charsRead = recv(establishedConnectionFD, buffer, 255, 0);
+  if (charsRead < 0) error("ERROR reading from socket", 1);
+  printf("I received this from the client: %s\n", buffer);
+  
+  charsRead = send(establishedConnectionFD, "server response text", 20, 0);
+  if (charsRead < 0) error("ERROR writing to socket", 1);
+  
+  close(establishedConnectionFD);
+  
   close(listenSocketFD);
   
   printf("Control connection closed.\n");
