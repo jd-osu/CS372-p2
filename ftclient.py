@@ -9,9 +9,11 @@ import sys
 from socket import *
 import signal
 
+USAGE = "USAGE: " + str(sys.argv[0]) + " [server host] [server port] [command + filename(optional)] [data port]"
+
 # Make sure there are at least one command line argument
 if (len(sys.argv) < 5) : 
-    print "USAGE: ", str(sys.argv[0]), " [server host] [server port] [command + filename(optional)] [data port]"
+    print USAGE
     exit(1)
 
 server_host = str(sys.argv[1])
@@ -30,7 +32,8 @@ if (not(server_port.isdigit) or
     server_port > 1024 or
     data_port < 1024 or
     data_port > 65535) :
-    print("Invalid port. Port must be integer in range: 1024-65535")
+    print"Invalid port. Port must be integer in range: 1024-65535")
+    print USAGE
     exit(1)
 
 print "server_host= " + server_host
