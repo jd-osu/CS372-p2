@@ -26,13 +26,19 @@ if (len(sys.argv) >= 6) :
 else :
     data_port = sys.argv[4]
 
+if (not(server_port.isdigit()) or not(data_port.isdigit())) :
+    print "INVALID INPUT: Ports must be integers."
+    print USAGE
+    exit(1)
+    
+server_port = int(server_port)
+data_port = int(data_port)
+
 print "server_host= " + server_host
 print "server_port= " + server_port
 print "command= " + command
 print "data_port= " + data_port
 
-#print "not(server_port.isdigit())="+str(not(server_port.isdigit()))
-#print "not(data_port.isdigit())="+str(not(data_port.isdigit()))
 print "server_port < 1024="+str(server_port < 1024)
 print "server_port > 65535="+str(server_port > 65535)
 print "data_port < 1024="+str(data_port < 1024)
@@ -41,11 +47,11 @@ print "data_port > 65535="+str(data_port > 65535)
 print "all together=" + str(not(server_port.isdigit()) or not(data_port.isdigit()) or server_port < 1024 or server_port > 65535 or data_port < 1024 or data_port > 65535)
 
 if (not(server_port.isdigit()) or not(data_port.isdigit()) or server_port < 1024 or server_port > 65535 or data_port < 1024 or data_port > 65535) :
-    print "Invalid port. Port must be integer in range: 1024-65535"
+    print "INVALID INPUT: Port must be in range 1024-65535"
     print USAGE
     exit(1)
 
-#test change
+
 """
 notice = "sending"
 ack = "OK"
