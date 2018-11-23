@@ -34,15 +34,10 @@ print "data_port= " + data_port
 print "server_port.isdigit="+ str(not(server_port.isdigit()))
 print "data_port.isdigit="+ str(not(data_port.isdigit()))
 
-if (not(server_port.isdigit()) or
-    not(data_port.isdigit()) or
-    server_port < 1024 or
-    server_port > 65535 or
-    data_port < 1024 or
-    data_port > 65535) :
-        print "Invalid port. Port must be integer in range: 1024-65535"
-        print USAGE
-        exit(1)
+if (not(server_port.isdigit()) or not(data_port.isdigit()) or server_port < 1024 or server_port > 65535 or data_port < 1024 or data_port > 65535) :
+    print "Invalid port. Port must be integer in range: 1024-65535"
+    print USAGE
+    exit(1)
 
 
 """
