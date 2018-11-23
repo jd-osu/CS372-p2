@@ -11,6 +11,9 @@ import signal
 
 USAGE = "USAGE: " + str(sys.argv[0]) + " [server host] [server port] [command + filename(optional)] [data port]"
 
+#TODO: Client has at least functions which perform: Initiate Contact, MakeRequest, ReceiveData
+
+
 # Make sure there are at least one command line argument
 if (len(sys.argv) < 5) : 
     print USAGE

@@ -18,10 +18,6 @@
 #define MESSAGEMAX 500  // max length of message text
 #define BUFFERMAX 1000	// max length of string buffer
 
-// global constant variables for preparatory messages
-static const char notice[] = "sending";
-static const char ack[] = "OK";
-
 // bool type defined as true/false logic is used extensively
 typedef enum {false, true} bool;
 
@@ -219,6 +215,39 @@ int sendall(int s, char *buf, int *len)
 
     return ret;
 }
+//TODO: Server has at least functions which perform: Start-up, HandleRequest
+/************************************************
+ * NAME
+ *	process_command
+ * DESCRIPTION
+ *	
+ * *********************************************/
+void process_command(char* command, char* response)
+{
+  // global constant variables for commands
+  static const char list[] = "-l";
+  static const char get[] = "-g";
+  static const char file_dir[] = "[file directory!]";
+  static const char get_res[] = "[getting file!]";
+  static const char invalid_cmd[] = "Invalid command!
+  
+  // The following code for getting the command substring was adapted from:
+  // "Get a substring of a char* [duplicate]"
+  // https://stackoverflow.com/questions/4214314/get-a-substring-of-a-char
+  char cmd_substr[3];
+  memcpy(cmd_substr, &command[0], 2);
+  cmd_substr[2] = '\0';
+
+  if (strcmp(cmd_substr, list) == 0)
+    strcpy(response, file_dir);
+  else if (strcmp(cmd_substr, get)
+  {
+    strcpy(response, get_res);
+  }
+  else
+    strcpy(response, invalid_cmd);
+
+}
 
 int main(int argc, char **argv)
 {
@@ -274,7 +303,10 @@ int main(int argc, char **argv)
   if (charsRead < 0) error("ERROR reading from socket", 1);
   printf("I received this from the client: %s\n", buffer);
   
-  charsRead = send(establishedConnectionFD, "server response text", 20, 0);
+  char response_text[300];
+  process_command(buffer, response_text);
+  
+  charsRead = send(establishedConnectionFD, response_text, strlen(response_text), 0);
   if (charsRead < 0) error("ERROR writing to socket", 1);
   
   close(establishedConnectionFD);
