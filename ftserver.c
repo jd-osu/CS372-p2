@@ -146,7 +146,7 @@ char *read_file(const char *filename)
 *    send_file
 * DESCRIPTION
 ****************************************************/
-int send_file(int s, char *filename)
+void send_file(int s, char *filename)
 {
   char *contents;
 
@@ -156,8 +156,6 @@ int send_file(int s, char *filename)
   
   
   free(contents);
-
-  return ret;
 }
 
 /************************************************
@@ -279,7 +277,7 @@ int main(int argc, char **argv)
 	  char response_text[300];
 	  
 	  // process command and send response text
-	  process_command(buffer, response_text);
+	  process_command(buffer, response_text, data_port);
 	  charsRead = send(establishedConnectionFD, response_text, strlen(response_text), 0);
 	  if (charsRead < 0) error("ERROR writing to socket", 1);
 	  
