@@ -188,24 +188,28 @@ void send_directory(int port, char *address)
 			(strcmp(dir->d_name, server_exc_txt) != 0) &&
 			(strcmp(dir->d_name, client_src_txt) != 0) )
 		{
-			i = i + strlen(dir->d_name);
-			printf("dir->d_name=%s\n", dir->d_name);
-			printf("dir->d_name length=%d\n", strlen(dir->d_name));
-			printf("total length=%d\n", i);
+	
+			// check if enough memory is allocated and reallocate if necessary
+			if ((i + strlen(dir->d_name)) >= (cap - 1))
+			{
+				cap = 100 * cap;
+				text = realloc(text, cap);
+				if (text == NULL)
+					error("Could not allocate memory", 1);
+			}
+			
+			for (int j=0; j < strlen(dir->d_name); j++)
+			{
+				text[i] = dir->d_name[j];
+				i++
+			}
+			
+			text[i] = '\n';
+			i++;
 		}
-		
-		// check if enough memory is allocated and reallocate if necessary
-		if (i >= (cap - 1))
-		{
-			cap = 100 * cap;
-			text = realloc(text, cap);
-			if (text == NULL)
-				error("Could not allocate memory", 1);
-		}
-		
-		//strcat(text, dir->d_name);
-		//strcat(text, "\n");
 	}
+	
+	text[i] = '\0';
 	
 	closedir(d);
   }
