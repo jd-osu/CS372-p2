@@ -31,8 +31,8 @@ print "server_port= " + server_port
 print "command= " + command
 print "data_port= " + data_port
 
-print "not(server_port.isdigit())="+str(not(server_port.isdigit()))
-print "not(data_port.isdigit())="+str(not(data_port.isdigit()))
+#print "not(server_port.isdigit())="+str(not(server_port.isdigit()))
+#print "not(data_port.isdigit())="+str(not(data_port.isdigit()))
 print "server_port < 1024="+str(server_port < 1024)
 print "server_port > 65535="+str(server_port > 65535)
 print "data_port < 1024="+str(data_port < 1024)
