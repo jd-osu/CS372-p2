@@ -51,8 +51,6 @@ print "data_port= " + str(data_port)
 clientSocket = socket(AF_INET, SOCK_STREAM)
 clientSocket.connect((server_host, server_port))
 
-print "test"
-
 print "Connection established with " + str(clientSocket.getpeername())
 
 clientSocket.close()
