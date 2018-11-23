@@ -176,6 +176,8 @@ void send_directory(int port, char *address)
     while ((dir = readdir(d)) != NULL) {
 		i = i + strlen(dir->d_name);
 		
+		printf("dir->d_name=%s\n", dir->d_name);
+		
 		// check if enough memory is allocated and reallocate if necessary
 		if (i >= (cap - 1))
 		{
