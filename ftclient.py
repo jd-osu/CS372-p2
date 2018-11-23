@@ -40,9 +40,9 @@ if (not(server_port.isdigit()) or
     server_port > 65535 or
     data_port < 1024 or
     data_port > 65535) :
-    print "Invalid port. Port must be integer in range: 1024-65535"
-    print USAGE
-    exit(1)
+        print "Invalid port. Port must be integer in range: 1024-65535"
+        print USAGE
+        exit(1)
 
 
 """
