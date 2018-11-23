@@ -1,12 +1,9 @@
 # !/usr/bin/python
-# chatserve.py
+# ftclient.py
 # Author: Jason DiMedio
 # CS372
-# October 28, 2018
-# This program is a server side component to a chat application. The server side
-# monitors a port based on command line input and connects with a client application.
-# In response to receiving a message from the client application, the server receives
-# user input and sends a message back to the client.
+# November 25, 2018
+# [description]
 
 import sys
 from socket import *

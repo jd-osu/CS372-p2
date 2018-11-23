@@ -1,5 +1,5 @@
-client: chatclient.c
-	gcc -o client chatclient.c
+client: ftserver.c
+	gcc -o ftserver ftserver.c
 
 clean:
-	rm -f client a.out *.0 *~
+	rm -f ftserver a.out *.0 *~
