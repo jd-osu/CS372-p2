@@ -151,7 +151,7 @@ char *read_file(const char *filename)
  *"How to list files in a directory in a C program?"
  * https://stackoverflow.com/questions/4204666/how-to-list-files-in-a-directory-in-a-c-program
  * *********************************************/
-void send_directory(int s, char *filename)
+void send_directory(int port, char *address)
 {
   char error_text[100];
   char *text = NULL;
@@ -217,7 +217,7 @@ void send_file(int s, char *filename)
  * DESCRIPTION
  *	
  * *********************************************/
-void process_command(char* command, char* response, int port)
+void process_command(char* command, char* response, int port, char* address)
 {
   // global constant variables for commands
   static const char list[] = "-l";
@@ -237,6 +237,7 @@ void process_command(char* command, char* response, int port)
   
   if (strcmp(cmd_substr, list) == 0)
   {
+	send_directory(port, address);	
 	
     strcpy(response, file_dir);
   }
