@@ -334,7 +334,7 @@ int main(int argc, char **argv)
 	  char response_text[300];
 	  
 	  // process command and send response text
-	  process_command(buffer, response_text, data_port);
+	  process_command(buffer, response_text, data_port, inet_ntoa(clientAddress.sin_addr));
 	  charsRead = send(establishedConnectionFD, response_text, strlen(response_text), 0);
 	  if (charsRead < 0) error("ERROR writing to socket", 1);
 	  
