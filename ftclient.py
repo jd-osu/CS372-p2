@@ -34,20 +34,16 @@ if (not(server_port.isdigit()) or not(data_port.isdigit())) :
 server_port = int(server_port)
 data_port = int(data_port)
 
-print "server_host= " + server_host
-print "server_port= " + str(server_port)
-print "command= " + command
-print "data_port= " + str(data_port)
-
-print "server_port < 1024="+str(server_port < 1024)
-print "server_port > 65535="+str(server_port > 65535)
-print "data_port < 1024="+str(data_port < 1024)
-print "data_port > 65535="+str(data_port > 65535)
-
 if (server_port < 1024 or server_port > 65535 or data_port < 1024 or data_port > 65535) :
     print "INVALID INPUT: Port must be in range 1024-65535"
     print USAGE
     exit(1)
+
+
+print "server_host= " + server_host
+print "server_port= " + str(server_port)
+print "command= " + command
+print "data_port= " + str(data_port)
 
 
 """
