@@ -49,7 +49,7 @@ print "data_port= " + str(data_port)
 # The following code has been adapted from CS372, Lecture 15, slide 8
 # "Example application: TCP client"
 clientSocket = socket(AF_INET, SOCK_STREAM)
-clientSocket.connect((server_host, server_port))
+clientSocket.connect(server_host, server_port)
 
 print "Connection established with " + str(clientSocket.getpeername())
 
