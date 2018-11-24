@@ -382,11 +382,7 @@ void send_directory(struct Conn *conn)
     
     closedir(d);
   }
-  
-      
-  // send the directory listing text to the client
-  establish_data_connection(conn);
-    
+ 
   int msg_len = strlen(text);
   int msg_sent;
 
@@ -395,6 +391,9 @@ void send_directory(struct Conn *conn)
     
   //await ready message from client
   read_control(conn);
+  
+  // send the directory listing text to the client
+  establish_data_connection(conn);
   
   printf("Sending directory contents to %s:%d\n", conn->client_address, conn->data_port);
   
