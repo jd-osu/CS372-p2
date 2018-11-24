@@ -374,16 +374,16 @@ void send_directory(struct Conn *conn)
   
       
   // send the directory listing text to the client
-  establish_data_connection(&conn);
+  establish_data_connection(conn);
     
   int msg_len = strlen(text);
   int msg_sent;
 
   // send control message to client
-  send_ctrl_msg(&conn, list);
+  send_ctrl_msg(conn, list);
     
   //await ready message from client
-  read_control(&conn);
+  read_control(conn);
   
   printf("Sending directory contents to %s:%d\n", conn->client_address, conn->data_port);
   
@@ -403,7 +403,7 @@ void send_directory(struct Conn *conn)
 *    
 * DESCRIPTION
 ****************************************************/
-void send_ctrl_msg(struct Conn *conn, char *msg)
+void send_ctrl_msg(struct Conn *conn, const char *msg)
 {
   int charsSent = send(conn->control_conn, msg, strlen(msg), 0);
   if (charsSent < 0) error("ERROR writing to socket", 1);
@@ -432,27 +432,26 @@ void send_file(int s, char *filename)
  * DESCRIPTION
  *  
  * *********************************************/
-void process_command(struct Conn *conn, char* input)
+void process_command(struct Conn *conn)
 {
   // global constant variables for commands
 
   static const char file_dir[] = "[file directory!]";
   static const char get_res[] = "[getting file!]";
   static const char invalid_cmd[] = "Invalid command!";
-  
-  char buffer[BUFFER];
+
   
   // The following code for getting the command substring was adapted from:
   // "Get a substring of a char* [duplicate]"
   // https://stackoverflow.com/questions/4214314/get-a-substring-of-a-char
-  memcpy(conn->cmd, &input[0], 2);
+  memcpy(conn->cmd, &conn->msg_buffer[0], 2);
   conn->cmd[2] = '\0';
   
   if (strcmp(conn->cmd, list) == 0)
-    send_directory(&conn);
+    send_directory(conn);
   else if (strcmp(conn->cmd, get) == 0)
   {
-    if (strlen(input) > 3 && input[2] == ' ')
+    if (strlen(conn->msg_buffer) > 3 && conn->msg_buffer[2] == ' ')
     {
       memcpy(conn->filename, &input[3], strlen(input)-3);
       conn->filename[strlen(input)-3] = '\0';
@@ -488,7 +487,7 @@ int main(int argc, char **argv)
     read_control(&conn);
     printf("1. I received this from the client: %s\n", conn.msg_buffer);
     
-    conn.data_port = atoi(conn.control_in);
+    conn.data_port = atoi(conn.msg_buffer);
     printf("Here is the data_port as an int: %d\n", conn.data_port);
       
     // send ACK "OK" msg in response
