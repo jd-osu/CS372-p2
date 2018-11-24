@@ -117,6 +117,7 @@ int sendall(int s, char *buf, int *len)
 char *read_file(const char *filename)
 {
   char error_text[100];
+  char file_nf[] = "File not found!";
   FILE *file;
   char *text = NULL;
   int c;
@@ -126,9 +127,15 @@ char *read_file(const char *filename)
   file = fopen(filename, "r");
   if (file == NULL)
   {
-    printf("errno=%s\n", strerror(errno));
-    sprintf(error_text, "Could not open %s", filename);
-    error(error_text, 1);
+    if (errno == 2)
+    {
+      send_ctrl_msg(conn, file_nf);
+      return text;
+    }
+    else {
+      sprintf(error_text, "Could not open %s", filename);
+      error(error_text, 1);
+    }
   }
 
   // allocate memory for string and clear it
@@ -418,11 +425,8 @@ void send_file(struct Conn *conn)
   // read text from file
   contents = read_file(conn->filename);
   
-  
-
-  
-  
-  free(contents);
+  if (contents != NULL)
+    free(contents);
 }
 
 /************************************************
