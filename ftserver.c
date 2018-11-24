@@ -289,6 +289,17 @@ void read_control(struct Conn *conn)
 *    
 * DESCRIPTION
 ****************************************************/
+void send_ctrl_msg(struct Conn *conn, const char *msg)
+{
+  int charsSent = send(conn->control_conn, msg, strlen(msg), 0);
+  if (charsSent < 0) error("ERROR writing to socket", 1);
+}
+
+/******************************************************
+* NAME
+*    
+* DESCRIPTION
+****************************************************/
 void clear_connection(struct Conn *conn)
 {
   conn->data_port = 0;
@@ -400,17 +411,6 @@ void send_directory(struct Conn *conn)
 
 /******************************************************
 * NAME
-*    
-* DESCRIPTION
-****************************************************/
-void send_ctrl_msg(struct Conn *conn, const char *msg)
-{
-  int charsSent = send(conn->control_conn, msg, strlen(msg), 0);
-  if (charsSent < 0) error("ERROR writing to socket", 1);
-}
-
-/******************************************************
-* NAME
 *    send_file
 * DESCRIPTION
 ****************************************************/
@@ -453,7 +453,7 @@ void process_command(struct Conn *conn)
   {
     if (strlen(conn->msg_buffer) > 3 && conn->msg_buffer[2] == ' ')
     {
-      memcpy(conn->filename, &input[3], strlen(input)-3);
+      memcpy(conn->filename, &conn->msg_buffer[3], strlen(input)-3);
       conn->filename[strlen(input)-3] = '\0';
       
       strcpy(conn->msg_buffer, get_res);
