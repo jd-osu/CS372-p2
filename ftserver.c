@@ -126,7 +126,7 @@ char *read_file(const char *filename)
   file = fopen(filename, "r");
   if (file == NULL)
   {
-    printf("errno=%d\n", errno);
+    printf("errno=%s\n", strerror(errno));
     sprintf(error_text, "Could not open %s", filename);
     error(error_text, 1);
   }
