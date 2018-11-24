@@ -117,7 +117,6 @@ int sendall(int s, char *buf, int *len)
 char *read_file(const char *filename)
 {
   char error_text[100];
-  char file_nf[] = "File not found!";
   FILE *file;
   char *text = NULL;
   int c;
@@ -128,10 +127,7 @@ char *read_file(const char *filename)
   if (file == NULL)
   {
     if (errno == 2)
-    {
-      send_ctrl_msg(conn, file_nf);
       return text;
-    }
     else {
       sprintf(error_text, "Could not open %s", filename);
       error(error_text, 1);
@@ -421,11 +417,18 @@ void send_directory(struct Conn *conn)
 void send_file(struct Conn *conn)
 {
   char *contents;
+  char file_nf[] = "File not found!";
 
   // read text from file
   contents = read_file(conn->filename);
   
-  if (contents != NULL)
+  if (contents == NULL)
+  {
+    send_ctrl_msg(conn, file_nf);
+    return;
+  }
+  
+  else
     free(contents);
 }
 
