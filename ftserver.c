@@ -180,11 +180,13 @@ void establish_data_connection(struct Conn *conn)
    */
   struct sockaddr_in serverAddress;
   struct hostent* serverHostInfo;
+  socklen_t sizeOfServerInfo;
+  sizeOfServerInfo = sizeof(serverAddress);
 
   memset((char*)&serverAddress, '\0', sizeof(serverAddress));
   serverAddress.sin_family = AF_INET;
   serverAddress.sin_port = htons(conn->data_port);
-  serverHostInfo = gethostbyaddr(conn->client_address);
+  serverHostInfo = gethostbyname(conn->client_name);
 
   if (serverHostInfo == NULL) error("ERROR, no such host",1);
 
@@ -249,7 +251,7 @@ void establish_control_connection(struct Conn *conn)
   */
   //accept connection
   socklen_t sizeOfClientInfo;
-    struct sockaddr_in clientAddress;
+  struct sockaddr_in clientAddress;
   sizeOfClientInfo = sizeof(clientAddress);
   conn->control_conn = accept(conn->control_socket, (struct sockaddr *)&clientAddress, &sizeOfClientInfo);
   if (conn->control_conn < 0) error("ERROR on accept", 1);
@@ -259,10 +261,10 @@ void establish_control_connection(struct Conn *conn)
   // https://stackoverflow.com/questions/3060950/how-to-get-ip-address-from-sock-structure-in-c
   strcpy(conn->client_address, inet_ntoa(clientAddress.sin_addr));
   
-  struct hostent* serverHostInfo;
-  serverHostInfo = gethostbyaddr(conn->client_address);
-  if (serverHostInfo != NULL)
-    strcpy(conn->client_name, (char*)serverHostInfo->h_name);
+  struct hostent* clientHostInfo;
+  clientHostInfo = gethostbyaddr((struct sockaddr *)&clientAddress, sizeOfClientInfo, AF_INET);
+  if (clientHostInfo != NULL)
+    strcpy(conn->client_name, (char*)clientHostInfo->h_name);
   
   printf("Connection from %s\n", conn->client_name);
 }
