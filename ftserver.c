@@ -186,11 +186,12 @@ void establish_data_connection(struct Conn *conn)
   memset((char*)&serverAddress, '\0', sizeof(serverAddress));
   serverAddress.sin_family = AF_INET;
   serverAddress.sin_port = htons(conn->data_port);
-  serverHostInfo = gethostbyname(conn->client_name);
+  inet_pton(AF_INET, conn->client_address, &(serverAddress.sin_addr));
+  //serverHostInfo = gethostbyaddr((struct sockaddr*)&serverAddress, sizeOfServerInfo, AF_INET);
 
-  if (serverHostInfo == NULL) error("ERROR, no such host",1);
+  //if (serverHostInfo == NULL) error("ERROR, no such host",1);
 
-  memcpy((char*)&serverAddress.sin_addr.s_addr, (char*)serverHostInfo->h_addr, serverHostInfo->h_length);
+  //memcpy((char*)&serverAddress.sin_addr.s_addr, (char*)serverHostInfo->h_addr, serverHostInfo->h_length);
 
   conn->data_socket = socket(AF_INET, SOCK_STREAM, 0);
   if (conn->data_socket < 0) error("ERROR opening socket", 1);
@@ -257,14 +258,9 @@ void establish_control_connection(struct Conn *conn)
   if (conn->control_conn < 0) error("ERROR on accept", 1);
     
   // The following line of code (inet_ntoa in particular) adapted from:
-  // "How to get ip address from sock structure in c?"
-  // https://stackoverflow.com/questions/3060950/how-to-get-ip-address-from-sock-structure-in-c
-  strcpy(conn->client_address, inet_ntoa(clientAddress.sin_addr));
-  
-  struct hostent* clientHostInfo;
-  clientHostInfo = gethostbyaddr((struct sockaddr *)&clientAddress, sizeOfClientInfo, AF_INET);
-  if (clientHostInfo != NULL)
-    strcpy(conn->client_name, (char*)clientHostInfo->h_name);
+  // "How to convert string to IP address and vice versa"
+  // https://stackoverflow.com/questions/5328070/how-to-convert-string-to-ip-address-and-vice-versa
+  inet_ntop(AF_INET, &(clientAddress.sin_addr),conn->client_address, CLIENTADDRESS);
   
   printf("Connection from %s\n", conn->client_address);
 }
