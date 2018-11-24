@@ -57,13 +57,6 @@ print "data_port= " + str(data_port)
 control_socket = socket(AF_INET, SOCK_STREAM)
 control_socket.connect((server_host, server_port))
 
-# Configure the data socket
-# The following code has been adapted from CS372, Lecture 15, slide 9
-# "Example application: TCP server"
-data_socket = socket(AF_INET, SOCK_STREAM)
-data_socket.bind(('',data_port))
-data_socket.listen(1)
-	
 print "Connection established with " + str(control_socket.getpeername())
 
 control_socket.send(str(data_port))
@@ -79,10 +72,19 @@ response = control_socket.recv(1024)
 print "2. Response from server: " + response
 
 if (response == LIST) :
+	# Configure the data socket
+	# The following code has been adapted from CS372, Lecture 15, slide 9
+	# "Example application: TCP server"
+	data_socket = socket(AF_INET, SOCK_STREAM)
+	data_socket.bind(('',data_port))
+	data_socket.listen(1)
+
 	#signal server to send
 	control_socket.send(ACK);
 	
 	connectionSocket, addr = data_socket.accept()
+	
+	response = control_socket.recv(1024)
 	
 	print "Receiving directory structure from " + server_host + ":" + data_port + "."
   
