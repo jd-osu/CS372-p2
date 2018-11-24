@@ -14,6 +14,7 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <dirent.h>
+#include <errno.h>
 
 // length of string buffers
 #define BUFFER 1000 
@@ -125,6 +126,7 @@ char *read_file(const char *filename)
   file = fopen(filename, "r");
   if (file == NULL)
   {
+    printf("errno=%d\n", errno);
     sprintf(error_text, "Could not open %s", filename);
     error(error_text, 1);
   }
@@ -409,12 +411,14 @@ void send_directory(struct Conn *conn)
 *    send_file
 * DESCRIPTION
 ****************************************************/
-void send_file(int s, char *filename)
+void send_file(struct Conn *conn)
 {
   char *contents;
 
   // read text from file
   contents = read_file(filename);
+  
+  
 
   
   
