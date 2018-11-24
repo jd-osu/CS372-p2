@@ -23,16 +23,14 @@
 #define CLIENTADDRESS 50
 #define CLIENTNAME 100
 
-#define SERVERSOURCE "ftserver.c"
-#define SERVEREXEC "ftserver"
-#define CLIENTSOURCE "ftclient.py"
+static const char server_src_txt[] = "ftserver.c";
+static const char server_exc_txt[] = "ftserver";
+static const char client_src_txt[] = "ftclient.py";
+static const char client_src_txt[] = "makefile";
 
 static const char ack[] = "OK";
 static const char list[] = "-l";
 static const char get[] = "-g";
-
-// bool type defined as true/false logic is used extensively
-typedef enum {false, true} bool;
 
 // data pertaining to the connection(s) for each client-server session
 struct Conn
@@ -326,9 +324,6 @@ void send_directory(struct Conn *conn)
 {
   printf("List directory requested on port %d.\n", conn->data_port);
 
-  static const char server_src_txt[] = SERVERSOURCE;
-  static const char server_exc_txt[] = SERVEREXEC;
-  static const char client_src_txt[] = CLIENTSOURCE;
   char *text = NULL;
   int c;
   int cap, len;
@@ -552,55 +547,4 @@ int main(int argc, char **argv)
   
   return EXIT_SUCCESS;
   
-  
-  /*
-
-
-  // as long as the connection is still good and quit isn't indicated
-  while (conn_good == true && get_message_input(message, handle) == true)
-  {
-    int msg_len = strlen(message);
-    int msg_sent;
-
-    // send message to server
-    msg_sent = sendall(socketFD, message, &msg_len);
-
-    // if there was an error during sending
-    if (msg_sent < 0)
-      error("ERROR writing to socket", 1);
-    // sent successfully
-    else if (msg_sent > 0)
-    {
-      //get return message from server
-      memset(message, '\0', sizeof(message));
-      charsRead = recv(socketFD, message, sizeof(message)-1, 0);
-
-      // if incoming message is a "sending" indicator, reply with ack
-      if(strcmp(message, notice) == 0)
-      {
-        send(socketFD, ack, strlen(ack), 0);
-        memset(message, '\0', sizeof(message));
-        charsRead = recv(socketFD, message, sizeof(message)-1, 0);
-      }
-
-      // if there was an error reading
-      if (charsRead < 0) error ("ERROR reading from socket",1);
-
-      // if the connection is closed
-      else if (charsRead == 0)
-        conn_good = false;
-
-      // if the message was received, display it
-      else
-        printf("%s\n", message);
-    }
-    else
-      conn_good = false;
-  }
-
-  close(socketFD);
-
-  printf("Chat connection closed.\n");
-
-  */
 }
