@@ -453,7 +453,7 @@ void process_command(struct Conn *conn)
   {
     if (strlen(conn->msg_buffer) > 3 && conn->msg_buffer[2] == ' ')
     {
-      memcpy(conn->filename, &conn->msg_buffer[3], strlen(input)-3);
+      memcpy(conn->filename, &conn->msg_buffer[3], strlen(conn->msg_buffer)-3);
       conn->filename[strlen(input)-3] = '\0';
       
       strcpy(conn->msg_buffer, get_res);
