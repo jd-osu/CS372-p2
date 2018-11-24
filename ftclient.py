@@ -71,34 +71,51 @@ response = control_socket.recv(1024)
 
 print "2. Response from server: " + response
 
-if (response == LIST) :
-	# Configure the data socket
-	# The following code has been adapted from CS372, Lecture 15, slide 9
-	# "Example application: TCP server"
-	data_socket = socket(AF_INET, SOCK_STREAM)
-	data_socket.bind(('',data_port))
-	data_socket.listen(1)
+# Configure the data socket
+# The following code has been adapted from CS372, Lecture 15, slide 9
+# "Example application: TCP server"
+data_socket = socket(AF_INET, SOCK_STREAM)
+data_socket.bind(('',data_port))
+data_socket.listen(1)
 
+if (response == LIST) :
+	#signal server to send filename
+	control_socket.send(ACK);
+	filename = control_socket.recv(1024)
+	
+	#signal server to send size
+	control_socket.send(ACK);
+	size = int(control_socket.recv(1024))
+	
+	# signal server to send file
+	control_socket.send(ACK)
+	
+	connectionSocket, addr = data_socket.accept()
+	
+	print "Receiving " + filename + "from " + server_host + ":" + str(data_port) + "."
+  
+	file_contents=""
+	
+	while (len(file_contents) < size) :
+		data = connectionSocket.recv(2000)
+		file_contents += data
+  
+	print "File transfer complete"
+	
+	print "File:"
+	print file_contents
+	
+elif (response == GET) :
 	#signal server to send
 	control_socket.send(ACK);
 	
 	connectionSocket, addr = data_socket.accept()
 	
-	print "Receiving directory structure from " + server_host + ":" + str(data_port) + "."
+	print "Receiving " + filename " + server_host + ":" + str(data_port) + "."
   
 	data = connectionSocket.recv(2000)
     
 	print data
-	
-elif (response == GET) :
-	#signal server to send
-	control_socket.send(ACK)
-	
-	connectionSocket, addr = data_socket.accept()
-	
-	data = connectionSocket.recv(2000)
-	
-	print "File contents:\n" + data
 	
 else :
 	print response

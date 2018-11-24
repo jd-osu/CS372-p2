@@ -418,6 +418,8 @@ void send_file(struct Conn *conn)
 {
   char *contents;
   char file_nf[] = "File not found!";
+  
+  printf("File\"%s\" requested on port %d.\n", conn->filename, conn->data_port);
 
   // read text from file
   contents = read_file(conn->filename);
@@ -428,8 +430,36 @@ void send_file(struct Conn *conn)
     return;
   }
   
-  else
-    free(contents);
+  int msg_len = strlen(contents);
+  int msg_sent;
+
+  // send control message to client
+  send_ctrl_msg(conn, get);
+      
+  //await ACK from client
+  read_control(conn);
+  
+  // send filename to client
+  send_ctrl_msg(conn, conn->filename);
+  
+  //await ready message from client
+  read_control(conn);
+    
+  // send the file contents to the client
+  establish_data_connection(conn);
+    
+  printf("Sending \"%s\" to %s:%d\n", conn->filename, conn->client_address, conn->data_port);
+    
+  msg_sent = sendall(conn->data_socket, contents, &msg_len);
+
+  // if there was an error during sending
+  if (msg_sent < 0)
+    error("ERROR writing to socket", 1);
+    
+  close(conn->data_socket);
+    
+  free(contents);
+  
 }
 
 /************************************************
