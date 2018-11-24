@@ -124,7 +124,7 @@ elif (response == GET) :
 		
 		file.close()
 		
-	print "File transfer complete"
+		print "File transfer complete"
 	
 else :
 	print response
