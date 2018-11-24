@@ -8,6 +8,7 @@
 import sys
 from socket import *
 import signal
+import os
 
 USAGE = "USAGE: " + str(sys.argv[0]) + " [server host] [server port] [command + filename(optional)] [data port]"
 
@@ -112,12 +113,18 @@ elif (response == GET) :
 		data = connectionSocket.recv(2000)
 		file_contents += data
   
-	print "File transfer complete"
+
 	
-	print "File:"
-	print file_contents
-
-
+	if os.path.exists(filename):
+		print "File with that name already exists! No file was transferred."
+	else :
+		file = open(filename, "w")
+		
+		file.write(file_contents)
+		
+		file.close()
+		
+	print "File transfer complete"
 	
 else :
 	print response
