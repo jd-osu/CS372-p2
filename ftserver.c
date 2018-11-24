@@ -419,7 +419,7 @@ void send_file(struct Conn *conn)
   char *contents;
   char file_nf[] = "File not found!";
   
-  printf("File\"%s\" requested on port %d.\n", conn->filename, conn->data_port);
+  printf("File \"%s\" requested on port %d.\n", conn->filename, conn->data_port);
 
   // read text from file
   contents = read_file(conn->filename);
@@ -441,6 +441,12 @@ void send_file(struct Conn *conn)
   
   // send filename to client
   send_ctrl_msg(conn, conn->filename);
+  
+  //await ACK from client
+  read_control(conn);
+  
+  // send file size to client
+  send_ctrl_msg(conn, strlen(contents));
   
   //await ready message from client
   read_control(conn);
