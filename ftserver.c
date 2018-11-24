@@ -455,7 +455,7 @@ void process_command(struct Conn *conn)
       memcpy(conn->filename, &conn->msg_buffer[3], strlen(conn->msg_buffer)-3);
       conn->filename[strlen(conn->msg_buffer)-3] = '\0';
       
-      strcpy(conn->msg_buffer, get_res);
+      send_file(conn);
     }
     else
       send_ctrl_msg(conn, invalid_cmd);
