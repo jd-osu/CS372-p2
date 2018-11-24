@@ -195,7 +195,7 @@ void establish_data_connection(struct Conn *conn)
   conn->data_socket = socket(AF_INET, SOCK_STREAM, 0);
   if (conn->data_socket < 0) error("ERROR opening socket", 1);
 
-  printf("Establishing data connection with client...\n");
+  printf("Establishing data connection with client at %s...\n", inet_ntoa(serverAddress.sin_addr));
 
   if (connect(conn->data_socket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0)
     error("ERROR connecting", 1);
