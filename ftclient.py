@@ -90,7 +90,7 @@ if (response == LIST) :
     
 	print "Directory listing:\n" + data
 	
-else if (response == GET) :
+elif (response == GET) :
 	#signal server to send
 	clientSocket.send(ACK)
 	
