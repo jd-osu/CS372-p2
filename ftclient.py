@@ -90,7 +90,7 @@ if (response == LIST) :
   
 	data = connectionSocket.recv(2000)
     
-	print "Directory listing:" + data
+	print data
 	
 elif (response == GET) :
 	#signal server to send
@@ -102,7 +102,8 @@ elif (response == GET) :
 	
 	print "File contents:\n" + data
 	
-print response
+else :
+	print response
 	
 control_socket.close()
 
