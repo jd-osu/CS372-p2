@@ -454,10 +454,10 @@ void process_command(struct Conn *conn)
       strcpy(conn->msg_buffer, get_res);
     }
     else
-        strcpy(conn->msg_buffer, invalid_cmd);
+      send_ctrl_msg(conn, invalid_cmd);
   }
   else
-    strcpy(conn->msg_buffer, invalid_cmd);
+    send_ctrl_msg(conn, invalid_cmd);
 
 }
 
