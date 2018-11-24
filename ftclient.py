@@ -103,7 +103,8 @@ elif (response == GET) :
 	print "File contents:\n" + data
 	
 else :
-	print response
+
+print response
 	
 control_socket.close()
 
