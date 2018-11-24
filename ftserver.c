@@ -446,7 +446,7 @@ void send_file(struct Conn *conn)
   read_control(conn);
   
   // send file size to client
-  send_ctrl_msg(conn, strlen(contents));
+  send_ctrl_msg(conn, str(strlen(contents)));
   
   //await ready message from client
   read_control(conn);
