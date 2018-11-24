@@ -11,6 +11,10 @@ import signal
 
 USAGE = "USAGE: " + str(sys.argv[0]) + " [server host] [server port] [command + filename(optional)] [data port]"
 
+LIST = "-l"
+GET = "-g"
+ACK = "OK"
+
 #TODO: Client has at least functions which perform: Initiate Contact, MakeRequest, ReceiveData
 
 # Make sure there are at least one command line argument
@@ -47,37 +51,60 @@ print "server_port= " + str(server_port)
 print "command= " + command
 print "data_port= " + str(data_port)
 
-# Configure the socket
+# Configure the client control socket
 # The following code has been adapted from CS372, Lecture 15, slide 8
 # "Example application: TCP client"
-clientSocket = socket(AF_INET, SOCK_STREAM)
-clientSocket.connect((server_host, server_port))
+control_socket = socket(AF_INET, SOCK_STREAM)
+control_socket.connect((server_host, server_port))
 
-print "Connection established with " + str(clientSocket.getpeername())
+# Configure the data socket
+# The following code has been adapted from CS372, Lecture 15, slide 9
+# "Example application: TCP server"
+data_socket = socket(AF_INET, SOCK_STREAM)
+data_socket.bind(('',data_port))
+data_socket.listen(1)
+	
+print "Connection established with " + str(control_socket.getpeername())
 
-clientSocket.send(str(data_port))
+control_socket.send(str(data_port))
 
-response = clientSocket.recv(1024)
+response = control_socket.recv(1024)
 
 print "1. Response from server: " + response
 
-clientSocket.send(command)
+control_socket.send(command)
 
-response = clientSocket.recv(1024)
+response = control_socket.recv(1024)
 
 print "2. Response from server: " + response
 
-clientSocket.close()
+if (response == LIST) :
+	#signal server to send
+	clientSocket.send(ACK);
+	
+	connectionSocket, addr = data_socket.accept()
+	
+	response = connectionSocket.recv(2000)
+    
+	print "Directory listing:\n" + response
+	
+else if (response == GET) :
+	#signal server to send
+	clientSocket.send(ACK)
+	
+	connectionSocket, addr = data_socket.accept()
+	
+	response = connectionSocket.recv(2000)
+	
+	print "File contents:\n" + response
+	
+else :
+	print response
+	
+control_socket.close()
+data_socket.close()
 
-# Configure the socket
-# The following code has been adapted from CS372, Lecture 15, slide 9
-# "Example application: TCP server"
-serverSocket = socket(AF_INET, SOCK_STREAM)
-serverSocket.bind(('',data_port))
-serverSocket.listen(1)
 
-print "Listening for data connection..."
-connectionSocket, addr = serverSocket.accept()
 
 """
 notice = "sending"

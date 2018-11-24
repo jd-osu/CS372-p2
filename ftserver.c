@@ -15,16 +15,36 @@
 #include <arpa/inet.h>
 #include <dirent.h>
 
-#define HANDLEMAX 10	// max length of handles
-#define MESSAGEMAX 500  // max length of message text
-#define BUFFERMAX 1000	// max length of string buffer
+// length of string buffers
+#define BUFFER 1000 
+#define FILENAME 200
+#define CMD 3
+#define CLIENTADDRESS 50
 
 #define SERVERSOURCE "ftserver.c"
 #define SERVEREXEC "ftserver"
 #define CLIENTSOURCE "ftclient.py"
 
+static const char ack[] = "OK";
+static const char list[] = "-l";
+static const char get[] = "-g";
+
 // bool type defined as true/false logic is used extensively
 typedef enum {false, true} bool;
+
+// data pertaining to the connection(s) for each client-server session
+struct Conn
+{
+  int server_port;
+  int data_port;
+  char client_address[CLIENTADDRESS];
+  char cmd[CMD];
+  char filename[FILENAME];
+  char msg_buffer[BUFFER];
+  int control_socket;
+  int control_conn;
+  int data_socket;
+};
 
 /************************************************
  * NAME
@@ -60,24 +80,23 @@ int sendall(int s, char *buf, int *len)
     int bytesleft = *len; // how many we have left to send
     int n, ret;
 
-	while(total < *len) {
-		n = send(s, buf+total, bytesleft, 0);
-		if (n == -1)
-		{
-			ret = -1;
-			break;
-		}
-		total += n;
-		bytesleft -= n;
-	}
+  while(total < *len) {
+    n = send(s, buf+total, bytesleft, 0);
+    if (n == -1)
+    {
+      ret = -1;
+      break;
+    }
+    total += n;
+    bytesleft -= n;
+  }
 
-	*len = total; // return number actually sent here
+  *len = total; // return number actually sent here
 
-	ret = total;
+  ret = total;
 
-    return ret;
+  return ret;
 }
-//TODO: Server has at least functions which perform: Start-up, HandleRequest
 
 /************************************************
  * NAME
@@ -148,42 +167,127 @@ char *read_file(const char *filename)
 
 /******************************************************
 * NAME
-*    establish_connection
+*    establish_data_socket
 * DESCRIPTION
 ****************************************************/
-int establish_connection(int port, char *address)
+void establish_data_connection(struct Conn *conn)
 {
   /* Configure the socket
    * The following code was adapted from CS344, Lecture 4.2, slide 21
    * "client.c"
    */
-  int socketFD;
-  int charsRead = 1;
-
   struct sockaddr_in serverAddress;
   struct hostent* serverHostInfo;
 
   memset((char*)&serverAddress, '\0', sizeof(serverAddress));
   serverAddress.sin_family = AF_INET;
-  serverAddress.sin_port = htons(port);
+  serverAddress.sin_port = htons(conn->data_port);
   serverHostInfo = gethostbyname(address);
 
   if (serverHostInfo == NULL) error("ERROR, no such host",1);
 
   memcpy((char*)&serverAddress.sin_addr.s_addr, (char*)serverHostInfo->h_addr, serverHostInfo->h_length);
 
-  socketFD = socket(AF_INET, SOCK_STREAM, 0);
-  if (socketFD < 0) error("ERROR opening socket", 1);
+  conn->data_socket = socket(AF_INET, SOCK_STREAM, 0);
+  if (conn->data_socket < 0) error("ERROR opening socket", 1);
 
-  printf("Connecting to server for new chat connection...\n");
+  printf("Establishing data connection with client...\n");
 
-  //connect to server
-  if (connect(socketFD, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0)
-	  error("ERROR connecting", 1);
+  if (connect(conn->data_socket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0)
+    error("ERROR connecting", 1);
 
-  printf("Connection from %s\n", inet_ntoa(serverAddress.sin_addr));
+  printf("Data connection established with %s\n", conn->client_address);
+}
+
+/******************************************************
+* NAME
+*    establish_control_socket
+* DESCRIPTION
+****************************************************/
+void configure_control_socket(struct Conn *conn, int port)
+{
+  conn->server_port = port;
   
-  return socketFD;
+  /* Configure the control socket
+   * The following code was adapted from CS344, Lecture 4.3, slide 16
+   * "server.c"
+   */
+  struct sockaddr_in serverAddress;
+  
+  // set up address struct for server
+  memset((char *)&serverAddress, '\0', sizeof(serverAddress));
+  
+  //create socket
+  serverAddress.sin_family = AF_INET;
+  serverAddress.sin_port = htons(conn->server_port);
+  serverAddress.sin_addr.s_addr = INADDR_ANY;
+  
+  //set up socket
+  conn->control_socket = socket(AF_INET, SOCK_STREAM, 0);
+  if (conn->control_socket < 0) error("ERROR opening socket", 1);
+  
+  // Listen for connection
+  if (bind(conn->control_socket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0)
+    error("ERROR binding", 1);
+  listen(conn->control_socket, 5);
+  
+  printf("Server open on %d\n", conn->server_port);
+}
+
+/******************************************************
+* NAME
+*    establish_control_socket
+* DESCRIPTION
+****************************************************/
+void establish_control_connection(struct Conn *conn)
+{
+  /* Accept and establish a connection with client
+  * The following code was adapted from CS344, Lecture 4.3, slide 16
+  * "server.c"
+  */
+  //accept connection
+  socklen_t sizeOfClientInfo;
+    struct sockaddr_in clientAddress;
+  sizeOfClientInfo = sizeof(clientAddress);
+  conn->control_conn = accept(conn->control_socket, (struct sockaddr *)&clientAddress, &sizeOfClientInfo);
+  if (conn->control_conn < 0) error("ERROR on accept", 1);
+    
+  // The following line of code (inet_ntoa in particular) adapted from:
+  // "How to get ip address from sock structure in c?"
+  // https://stackoverflow.com/questions/3060950/how-to-get-ip-address-from-sock-structure-in-c
+  strcpy(conn->client_address, inet_ntoa(clientAddress.sin_addr));
+  printf("Connection from %s\n", conn->client_address);
+}
+
+/******************************************************
+* NAME
+*    
+* DESCRIPTION
+****************************************************/
+void read_control(struct Conn *conn)
+{
+  int charsRead;
+  
+  // get data port first
+  memset(conn->msg_buffer, '\0', BUFFER * sizeof(conn->msg_buffer[0]));
+  charsRead = recv(conn->control_conn, conn->msg_buffer, BUFFER-1, 0);
+  if (charsRead < 0) error("ERROR reading from socket", 1);
+}
+
+/******************************************************
+* NAME
+*    
+* DESCRIPTION
+****************************************************/
+void clear_connection(struct Conn *conn)
+{
+  conn->data_port = 0;
+  memset(conn->client_address, '\0', CLIENTADDRESS * sizeof(conn->client_address[0]));
+  memset(conn->cmd, '\0', CMD * sizeof(conn->cmd[0]));
+  memset(conn->filename, '\0', FILENAME * sizeof(conn->filename[0]));
+  memset(conn->msg_buffer, '\0', BUFFER * sizeof(conn->msg_buffer[0]));
+  conn->control_conn = 0;
+  conn->data_socket = 0;
 }
 
 /************************************************
@@ -195,15 +299,15 @@ int establish_connection(int port, char *address)
  *"How to list files in a directory in a C program?"
  * https://stackoverflow.com/questions/4204666/how-to-list-files-in-a-directory-in-a-c-program
  * *********************************************/
-void send_directory(int port, char *address)
+void send_directory(struct Conn *conn)
 {
   static const char server_src_txt[] = SERVERSOURCE;
   static const char server_exc_txt[] = SERVEREXEC;
   static const char client_src_txt[] = CLIENTSOURCE;
-  char error_text[100];
   char *text = NULL;
   int c;
   int cap, len;
+  char buffer[BUFFER];
     
   // allocate memory for string and clear it
   cap = 100 * sizeof(char);
@@ -221,55 +325,71 @@ void send_directory(int port, char *address)
   d = opendir(".");
   if (d) {
     while ((dir = readdir(d)) != NULL) {
-		
-		//ignore source code files and directories
-		if ((dir->d_type == DT_REG) &&
-			(strcmp(dir->d_name, server_src_txt) != 0) &&
-			(strcmp(dir->d_name, server_exc_txt) != 0) &&
-			(strcmp(dir->d_name, client_src_txt) != 0) )
-		{
-	
-			// check if enough memory is allocated and reallocate if necessary
-			if ((i + strlen(dir->d_name)) >= (cap - 1))
-			{
-				cap = 100 * cap;
-				text = realloc(text, cap);
-				if (text == NULL)
-					error("Could not allocate memory", 1);
-			}
-			
-			int j;
-			
-			for (j=0; j < strlen(dir->d_name); j++)
-			{
-				text[i] = dir->d_name[j];
-				i++;
-			}
-			
-			text[i] = '\n';
-			i++;
-		}
-	}
-	
-	text[i] = '\0';
-	
-	// send the directory listing text to the client
-	int socket = establish_connection(port, address);
-	
-	int msg_len = strlen(text);
-	int msg_sent;
+    
+      //ignore source code files and directories
+      if ((dir->d_type == DT_REG) &&
+        (strcmp(dir->d_name, server_src_txt) != 0) &&
+        (strcmp(dir->d_name, server_exc_txt) != 0) &&
+        (strcmp(dir->d_name, client_src_txt) != 0) )
+      {
+    
+        // check if enough memory is allocated and reallocate if necessary
+        if ((i + strlen(dir->d_name)) >= (cap - 1))
+        {
+          cap = 100 * cap;
+          text = realloc(text, cap);
+          if (text == NULL)
+            error("Could not allocate memory", 1);
+        }
+        
+        int j;
+        
+        for (j=0; j < strlen(dir->d_name); j++)
+        {
+          text[i] = dir->d_name[j];
+          i++;
+        }
+        
+        text[i] = '\n';
+        i++;
+      }
+    }
+  
+    text[i] = '\0';
+    
+    // send the directory listing text to the client
+    establish_data_connection(&conn);
+    
+    int msg_len = strlen(text);
+    int msg_sent;
 
-	// send message to server
-	msg_sent = sendall(socket, text, &msg_len);
+    // send control message to client
+    send_ctrl_msg(&conn, list);
+    
+    //await ready message from client
+    read_control(&conn);
+    
+    msg_sent = sendall(conn->control_conn, text, &msg_len);
 
-	// if there was an error during sending
-	if (msg_sent < 0)
-		error("ERROR writing to socket", 1);
-	
-	closedir(d);
+    // if there was an error during sending
+    if (msg_sent < 0)
+      error("ERROR writing to socket", 1);
+    
+    closedir(d);
   }
 
   free(text);
+}
+
+/******************************************************
+* NAME
+*    
+* DESCRIPTION
+****************************************************/
+void send_ctrl_msg(struct Conn *conn, char *msg)
+{
+  int charsSent = send(conn->control_conn, msg, strlen(msg), 0);
+  if (charsSent < 0) error("ERROR writing to socket", 1);
 }
 
 /******************************************************
@@ -291,50 +411,42 @@ void send_file(int s, char *filename)
 
 /************************************************
  * NAME
- *	process_command
+ *  process_command
  * DESCRIPTION
- *	
+ *  
  * *********************************************/
-void process_command(char* command, char* response, int port, char* address)
+void process_command(struct Conn *conn, char* input)
 {
   // global constant variables for commands
-  static const char list[] = "-l";
-  static const char get[] = "-g";
+
   static const char file_dir[] = "[file directory!]";
   static const char get_res[] = "[getting file!]";
   static const char invalid_cmd[] = "Invalid command!";
   
-  char buffer[1000];
+  char buffer[BUFFER];
   
   // The following code for getting the command substring was adapted from:
   // "Get a substring of a char* [duplicate]"
   // https://stackoverflow.com/questions/4214314/get-a-substring-of-a-char
-  char cmd_substr[3];
-  memcpy(cmd_substr, &command[0], 2);
-  cmd_substr[2] = '\0';
+  memcpy(conn->cmd, &input[0], 2);
+  conn->cmd[2] = '\0';
   
-  if (strcmp(cmd_substr, list) == 0)
+  if (strcmp(conn->cmd, list) == 0)
+    send_directory(&conn);  
+  else if (strcmp(conn->cmd, get) == 0)
   {
-	send_directory(port, address);	
-	
-    strcpy(response, file_dir);
-  }
-  else if (strcmp(cmd_substr, get) == 0)
-  {
-	char filename_substr[100];
-	
-	if (strlen(command) > 3 && command[2] == ' ')
-	{
-      memcpy(filename_substr, &command[3], strlen(command)-3);
-      filename_substr[strlen(command)-3] = '\0';
-	  
-	  strcpy(response, get_res);
-	}
-	else
-      strcpy(response, invalid_cmd);
+    if (strlen(input) > 3 && input[2] == ' ')
+    {
+      memcpy(conn->filename, &input[3], strlen(input)-3);
+      conn->filename[strlen(input)-3] = '\0';
+      
+      strcpy(conn->msg_buffer, get_res);
+    }
+    else
+        strcpy(conn->msg_buffer, invalid_cmd);
   }
   else
-    strcpy(response, invalid_cmd);
+    strcpy(conn->msg_buffer, invalid_cmd);
 
 }
 
@@ -347,80 +459,38 @@ int main(int argc, char **argv)
     exit(1);
   }
 
-  int server_port = atoi(argv[1]);
-  int data_port = 0;
+  struct Conn conn;
     
-  /* Configure the socket
-   * The following code was adapted from CS344, Lecture 4.3, slide 16
-   * "server.c"
-   */
-  int listenSocketFD, establishedConnectionFD, charsRead;
-  socklen_t sizeOfClientInfo;
-  char buffer[256];
-  struct sockaddr_in serverAddress, clientAddress;
+  configure_control_socket(&conn, atoi(argv[1]));
   
-  // set up address struct for server
-  memset((char *)&serverAddress, '\0', sizeof(serverAddress));
-  
-  //create socket
-  serverAddress.sin_family = AF_INET;
-  serverAddress.sin_port = htons(server_port);
-  serverAddress.sin_addr.s_addr = INADDR_ANY;
-  
-  //set up socket
-  listenSocketFD = socket(AF_INET, SOCK_STREAM, 0);
-  if (listenSocketFD < 0) error("ERROR opening socket", 1);
-  
-  // Listen for connection
-  if (bind(listenSocketFD, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0)
-	  error("ERROR binding", 1);
-  listen(listenSocketFD, 5);
-  
-  printf("Server open on %d\n", server_port);
-
   while(1)
   {
-	  //accept connection
-	  sizeOfClientInfo = sizeof(clientAddress);
-	  establishedConnectionFD = accept(listenSocketFD, (struct sockaddr *)&clientAddress, &sizeOfClientInfo);
-	  if (establishedConnectionFD < 0) error("ERROR on accept", 1);
-	  
-	  // The following line of code (inet_ntoa in particular) adapted from:
-	  // "How to get ip address from sock structure in c?"
-	  // https://stackoverflow.com/questions/3060950/how-to-get-ip-address-from-sock-structure-in-c
-	  printf("Connection from %s\n", inet_ntoa(clientAddress.sin_addr));
-	  
-	  
-	  // get data port first
-	  memset(buffer, '\0', 256);
-	  charsRead = recv(establishedConnectionFD, buffer, 255, 0);
-	  if (charsRead < 0) error("ERROR reading from socket", 1);
-	  printf("1. I received this from the client: %s\n", buffer);
-	  data_port = atoi(buffer);
-	  printf("Here is the data_port as an int: %d\n", data_port);
-	  
-	  // send "OK" in response
-	  charsRead = send(establishedConnectionFD, "OK", 2, 0);
-	  if (charsRead < 0) error("ERROR writing to socket", 1);
-	  
-	  
-	  // get command
-	  memset(buffer, '\0', 256);
-	  charsRead = recv(establishedConnectionFD, buffer, 255, 0);
-	  if (charsRead < 0) error("ERROR reading from socket", 1);
-	  printf("2. I received this from the client: %s\n", buffer);
-	  char response_text[300];
-	  
-	  // process command and send response text
-	  process_command(buffer, response_text, data_port, inet_ntoa(clientAddress.sin_addr));
-	  charsRead = send(establishedConnectionFD, response_text, strlen(response_text), 0);
-	  if (charsRead < 0) error("ERROR writing to socket", 1);
-	  
-	  close(establishedConnectionFD);
-	  data_port = 0;
+    establish_control_connection(&conn);
+    
+    // get data port first
+    read_control(&conn);
+    printf("1. I received this from the client: %s\n", conn.msg_buffer);
+    
+    conn.data_port = atoi(conn.control_in);
+    printf("Here is the data_port as an int: %d\n", conn.data_port);
+      
+    // send ACK "OK" msg in response
+    send_ctrl_msg(&conn, ack);    
+    
+    // get command
+    read_control(&conn);
+    printf("2. I received this from the client: %s\n", conn.msg_buffer);
+    
+    // process command and send control response
+    process_command(&conn);
+    send_ctrl_msg(&conn, conn.msg_buffer);
+    
+    close(conn.control_conn);
+  
+    clear_connection(&conn);
   }
   
-  close(listenSocketFD);
+  close(conn.control_socket);
   
   printf("Control connection closed.\n");
   
@@ -433,43 +503,43 @@ int main(int argc, char **argv)
   // as long as the connection is still good and quit isn't indicated
   while (conn_good == true && get_message_input(message, handle) == true)
   {
-	  int msg_len = strlen(message);
-	  int msg_sent;
+    int msg_len = strlen(message);
+    int msg_sent;
 
-	  // send message to server
-	  msg_sent = sendall(socketFD, message, &msg_len);
+    // send message to server
+    msg_sent = sendall(socketFD, message, &msg_len);
 
-	  // if there was an error during sending
-	  if (msg_sent < 0)
-		  error("ERROR writing to socket", 1);
-	  // sent successfully
-	  else if (msg_sent > 0)
-	  {
-		  //get return message from server
-		  memset(message, '\0', sizeof(message));
-		  charsRead = recv(socketFD, message, sizeof(message)-1, 0);
+    // if there was an error during sending
+    if (msg_sent < 0)
+      error("ERROR writing to socket", 1);
+    // sent successfully
+    else if (msg_sent > 0)
+    {
+      //get return message from server
+      memset(message, '\0', sizeof(message));
+      charsRead = recv(socketFD, message, sizeof(message)-1, 0);
 
-		  // if incoming message is a "sending" indicator, reply with ack
-		  if(strcmp(message, notice) == 0)
-		  {
-			  send(socketFD, ack, strlen(ack), 0);
-			  memset(message, '\0', sizeof(message));
-			  charsRead = recv(socketFD, message, sizeof(message)-1, 0);
-		  }
+      // if incoming message is a "sending" indicator, reply with ack
+      if(strcmp(message, notice) == 0)
+      {
+        send(socketFD, ack, strlen(ack), 0);
+        memset(message, '\0', sizeof(message));
+        charsRead = recv(socketFD, message, sizeof(message)-1, 0);
+      }
 
-		  // if there was an error reading
-		  if (charsRead < 0) error ("ERROR reading from socket",1);
+      // if there was an error reading
+      if (charsRead < 0) error ("ERROR reading from socket",1);
 
-		  // if the connection is closed
-		  else if (charsRead == 0)
-			  conn_good = false;
+      // if the connection is closed
+      else if (charsRead == 0)
+        conn_good = false;
 
-		  // if the message was received, display it
-		  else
-			  printf("%s\n", message);
-	  }
-	  else
-		  conn_good = false;
+      // if the message was received, display it
+      else
+        printf("%s\n", message);
+    }
+    else
+      conn_good = false;
   }
 
   close(socketFD);
