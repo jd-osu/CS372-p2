@@ -393,7 +393,7 @@ void send_directory(struct Conn *conn)
   
   printf("Sending directory contents to %s:%d\n", conn->client_address, conn->data_port);
   
-  msg_sent = sendall(conn->control_conn, text, &msg_len);
+  msg_sent = sendall(conn->data_socket, text, &msg_len);
 
   // if there was an error during sending
   if (msg_sent < 0)
