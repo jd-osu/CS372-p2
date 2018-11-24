@@ -80,7 +80,7 @@ print "2. Response from server: " + response
 
 if (response == LIST) :
 	#signal server to send
-	clientSocket.send(ACK);
+	control_socket.send(ACK);
 	
 	connectionSocket, addr = data_socket.accept()
 	
@@ -92,7 +92,7 @@ if (response == LIST) :
 	
 elif (response == GET) :
 	#signal server to send
-	clientSocket.send(ACK)
+	control_socket.send(ACK)
 	
 	connectionSocket, addr = data_socket.accept()
 	
