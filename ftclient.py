@@ -79,6 +79,18 @@ data_socket.bind(('',data_port))
 data_socket.listen(1)
 
 if (response == LIST) :
+	#signal server to send
+	control_socket.send(ACK);
+	
+	connectionSocket, addr = data_socket.accept()
+	
+	print "Receiving directory structure from " + server_host + ":" + str(data_port) + "."
+  
+	data = connectionSocket.recv(2000)
+    
+	print data
+	
+elif (response == GET) :
 	#signal server to send filename
 	control_socket.send(ACK);
 	filename = control_socket.recv(1024)
@@ -104,18 +116,8 @@ if (response == LIST) :
 	
 	print "File:"
 	print file_contents
-	
-elif (response == GET) :
-	#signal server to send
-	control_socket.send(ACK);
-	
-	connectionSocket, addr = data_socket.accept()
-	
-	print "Receiving " + filename " from " + server_host + ":" + str(data_port) + "."
-  
-	data = connectionSocket.recv(2000)
-    
-	print data
+
+
 	
 else :
 	print response
