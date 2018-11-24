@@ -84,9 +84,11 @@ if (response == LIST) :
 	
 	connectionSocket, addr = data_socket.accept()
 	
-	response = connectionSocket.recv(2000)
+  print "Receiving directory structure from " + server_host + ":" + data_port + "."
+  
+	data = connectionSocket.recv(2000)
     
-	print "Directory listing:\n" + response
+	print "Directory listing:\n" + data
 	
 else if (response == GET) :
 	#signal server to send
@@ -94,16 +96,13 @@ else if (response == GET) :
 	
 	connectionSocket, addr = data_socket.accept()
 	
-	response = connectionSocket.recv(2000)
+	data = connectionSocket.recv(2000)
 	
-	print "File contents:\n" + response
+	print "File contents:\n" + data
 	
-else :
-	print response
+print response
 	
 control_socket.close()
-data_socket.close()
-
 
 
 """

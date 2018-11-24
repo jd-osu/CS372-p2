@@ -301,6 +301,8 @@ void clear_connection(struct Conn *conn)
  * *********************************************/
 void send_directory(struct Conn *conn)
 {
+  printf("List directory requested on port %d.\n", conn->data_port);
+
   static const char server_src_txt[] = SERVERSOURCE;
   static const char server_exc_txt[] = SERVEREXEC;
   static const char client_src_txt[] = CLIENTSOURCE;
@@ -357,26 +359,31 @@ void send_directory(struct Conn *conn)
   
     text[i] = '\0';
     
-    // send the directory listing text to the client
-    establish_data_connection(&conn);
-    
-    int msg_len = strlen(text);
-    int msg_sent;
-
-    // send control message to client
-    send_ctrl_msg(&conn, list);
-    
-    //await ready message from client
-    read_control(&conn);
-    
-    msg_sent = sendall(conn->control_conn, text, &msg_len);
-
-    // if there was an error during sending
-    if (msg_sent < 0)
-      error("ERROR writing to socket", 1);
-    
     closedir(d);
   }
+  
+      
+  // send the directory listing text to the client
+  establish_data_connection(&conn);
+    
+  int msg_len = strlen(text);
+  int msg_sent;
+
+  // send control message to client
+  send_ctrl_msg(&conn, list);
+    
+  //await ready message from client
+  read_control(&conn);
+  
+  printf("Sending directory contents to %s:%d\n", conn->client_address, conn->data_port);
+  
+  msg_sent = sendall(conn->control_conn, text, &msg_len);
+
+  // if there was an error during sending
+  if (msg_sent < 0)
+    error("ERROR writing to socket", 1);
+  
+  close(conn->data_socket);
 
   free(text);
 }
@@ -432,7 +439,7 @@ void process_command(struct Conn *conn, char* input)
   conn->cmd[2] = '\0';
   
   if (strcmp(conn->cmd, list) == 0)
-    send_directory(&conn);  
+    send_directory(&conn);
   else if (strcmp(conn->cmd, get) == 0)
   {
     if (strlen(input) > 3 && input[2] == ' ')
@@ -483,16 +490,9 @@ int main(int argc, char **argv)
     
     // process command and send control response
     process_command(&conn);
-    send_ctrl_msg(&conn, conn.msg_buffer);
     
-    close(conn.control_conn);
-  
     clear_connection(&conn);
   }
-  
-  close(conn.control_socket);
-  
-  printf("Control connection closed.\n");
   
   return EXIT_SUCCESS;
   
