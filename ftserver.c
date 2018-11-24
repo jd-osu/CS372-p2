@@ -20,6 +20,7 @@
 #define FILENAME 200
 #define CMD 3
 #define CLIENTADDRESS 50
+#define CLIENTNAME 100
 
 #define SERVERSOURCE "ftserver.c"
 #define SERVEREXEC "ftserver"
@@ -38,6 +39,7 @@ struct Conn
   int server_port;
   int data_port;
   char client_address[CLIENTADDRESS];
+  char client_name[CLIENTNAME];
   char cmd[CMD];
   char filename[FILENAME];
   char msg_buffer[BUFFER];
@@ -182,7 +184,7 @@ void establish_data_connection(struct Conn *conn)
   memset((char*)&serverAddress, '\0', sizeof(serverAddress));
   serverAddress.sin_family = AF_INET;
   serverAddress.sin_port = htons(conn->data_port);
-  serverHostInfo = gethostbyname(address);
+  serverHostInfo = gethostbyaddr(conn->client_address);
 
   if (serverHostInfo == NULL) error("ERROR, no such host",1);
 
@@ -196,7 +198,7 @@ void establish_data_connection(struct Conn *conn)
   if (connect(conn->data_socket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0)
     error("ERROR connecting", 1);
 
-  printf("Data connection established with %s\n", conn->client_address);
+  printf("Data connection established with %s\n", conn->client_name);
 }
 
 /******************************************************
@@ -256,7 +258,13 @@ void establish_control_connection(struct Conn *conn)
   // "How to get ip address from sock structure in c?"
   // https://stackoverflow.com/questions/3060950/how-to-get-ip-address-from-sock-structure-in-c
   strcpy(conn->client_address, inet_ntoa(clientAddress.sin_addr));
-  printf("Connection from %s\n", conn->client_address);
+  
+  struct hostent* serverHostInfo;
+  serverHostInfo = gethostbyaddr(conn->client_address);
+  if (serverHostInfo != NULL)
+    strcpy(conn->client_name, (char*)serverHostInfo->h_name);
+  
+  printf("Connection from %s\n", conn->client_name);
 }
 
 /******************************************************
