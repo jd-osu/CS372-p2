@@ -139,6 +139,7 @@ char *read_file(const char *filename)
   text = malloc(cap);
   if (text == NULL)
     error("Could not allocate memory", 1);
+  memset(text, '\0', 100 * sizeof(text[0]));
 
   int i = 0;
 
@@ -338,8 +339,7 @@ void send_directory(struct Conn *conn)
   text = malloc(cap);
   if (text == NULL)
     error("Could not allocate memory", 1);
-  memset(text, '\0', 100);
-
+  memset(text, '\0', 100 * sizeof(text[0]));
   
   DIR *d;
   
@@ -467,7 +467,8 @@ void send_file(struct Conn *conn)
     error("ERROR writing to socket", 1);
     
   close(conn->data_socket);
-    
+  
+  memset(contents, '\0', strlen(contents) * sizeof(contents[0]));    
   free(contents);
   
 }
