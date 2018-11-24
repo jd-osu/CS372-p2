@@ -417,6 +417,8 @@ void send_directory(struct Conn *conn)
 void send_file(struct Conn *conn)
 {
   char *contents;
+  char size_str[100];
+  int size;
   char file_nf[] = "File not found!";
   
   printf("File \"%s\" requested on port %d.\n", conn->filename, conn->data_port);
@@ -446,7 +448,9 @@ void send_file(struct Conn *conn)
   read_control(conn);
   
   // send file size to client
-  send_ctrl_msg(conn, itoa(strlen(contents)));
+  size = strlen(contents);
+  sprintf(size_str, "%d", size);
+  send_ctrl_msg(conn, size_str);
   
   //await ready message from client
   read_control(conn);
