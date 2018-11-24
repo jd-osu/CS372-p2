@@ -98,7 +98,7 @@ elif (response == GET) :
 	
 	connectionSocket, addr = data_socket.accept()
 	
-	data = connectionSocket.recv(2000)
+	data = data_socket.recv(2000)
 	
 	print "File contents:\n" + data
 	
