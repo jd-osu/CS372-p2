@@ -200,7 +200,7 @@ void establish_data_connection(struct Conn *conn)
   if (connect(conn->data_socket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0)
     error("ERROR connecting", 1);
 
-  printf("Data connection established with %s\n", conn->client_name);
+  printf("Data connection established with %s\n", conn->client_address);
 }
 
 /******************************************************
@@ -266,7 +266,7 @@ void establish_control_connection(struct Conn *conn)
   if (clientHostInfo != NULL)
     strcpy(conn->client_name, (char*)clientHostInfo->h_name);
   
-  printf("Connection from %s\n", conn->client_name);
+  printf("Connection from %s\n", conn->client_address);
 }
 
 /******************************************************
