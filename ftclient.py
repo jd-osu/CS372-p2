@@ -102,7 +102,7 @@ elif (response == GET) :
 	
 	print "File contents:\n" + data
 	
-else :
+#else :
 
 print response
 	
