@@ -26,7 +26,7 @@
 static const char server_src_txt[] = "ftserver.c";
 static const char server_exc_txt[] = "ftserver";
 static const char client_src_txt[] = "ftclient.py";
-static const char client_src_txt[] = "makefile";
+static const char makefile_txt[] = "makefile";
 
 static const char ack[] = "OK";
 static const char list[] = "-l";
@@ -349,7 +349,8 @@ void send_directory(struct Conn *conn)
       if ((dir->d_type == DT_REG) &&
         (strcmp(dir->d_name, server_src_txt) != 0) &&
         (strcmp(dir->d_name, server_exc_txt) != 0) &&
-        (strcmp(dir->d_name, client_src_txt) != 0) )
+        (strcmp(dir->d_name, server_exc_txt) != 0) &&
+        (strcmp(dir->d_name, makefile_txt) != 0) )
       {
     
         // check if enough memory is allocated and reallocate if necessary
