@@ -69,6 +69,15 @@ print "2. Response from server: " + response
 
 clientSocket.close()
 
+# Configure the socket
+# The following code has been adapted from CS372, Lecture 15, slide 9
+# "Example application: TCP server"
+serverSocket = socket(AF_INET, SOCK_STREAM)
+serverSocket.bind(('',data_port))
+serverSocket.listen(1)
+
+print "Listening for data connection..."
+connectionSocket, addr = serverSocket.accept()
 
 """
 notice = "sending"
@@ -109,17 +118,7 @@ def get_ack(socket):
 
 
 
-# Configure the socket
-# The following code has been adapted from CS372, Lecture 15, slide 9
-# "Example application: TCP server"
-serverSocket = socket(AF_INET, SOCK_STREAM)
-serverSocket.bind(('',port))
-serverSocket.listen(1)
 
-# Listen continuously at the specified port (unless a SIGINT is caught)
-while 1:
-    print "Listening for new chat connection..."
-    connectionSocket, addr = serverSocket.accept()
 
     #initialize message length, connection status and quit status
     in_msg_length = 1

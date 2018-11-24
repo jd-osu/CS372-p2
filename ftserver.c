@@ -146,6 +146,46 @@ char *read_file(const char *filename)
   return text;
 }
 
+/******************************************************
+* NAME
+*    establish_connection
+* DESCRIPTION
+****************************************************/
+int establish_connection(int port, char *address)
+{
+  /* Configure the socket
+   * The following code was adapted from CS344, Lecture 4.2, slide 21
+   * "client.c"
+   */
+  int socketFD;
+  int charsRead = 1;
+
+  struct sockaddr_in serverAddress;
+  struct hostent* serverHostInfo;
+
+  memset((char*)&serverAddress, '\0', sizeof(serverAddress));
+  serverAddress.sin_family = AF_INET;
+  serverAddress.sin_port = htons(port);
+  serverHostInfo = gethostbyname(address);
+
+  if (serverHostInfo == NULL) error("ERROR, no such host",1);
+
+  memcpy((char*)&serverAddress.sin_addr.s_addr, (char*)serverHostInfo->h_addr, serverHostInfo->h_length);
+
+  socketFD = socket(AF_INET, SOCK_STREAM, 0);
+  if (socketFD < 0) error("ERROR opening socket", 1);
+
+  printf("Connecting to server for new chat connection...\n");
+
+  //connect to server
+  if (connect(socketFD, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0)
+	  error("ERROR connecting", 1);
+
+  printf("Connection from %s\n", inet_ntoa(serverAddress.sin_addr));
+  
+  return socketFD;
+}
+
 /************************************************
  * NAME
  *   send_directory
@@ -213,10 +253,21 @@ void send_directory(int port, char *address)
 	
 	text[i] = '\0';
 	
+	// send the directory listing text to the client
+	int socket = establish_connection(port, address);
+	
+	int msg_len = strlen(text);
+	int msg_sent;
+
+	// send message to server
+	msg_sent = sendall(socket, text, &msg_len);
+
+	// if there was an error during sending
+	if (msg_sent < 0)
+		error("ERROR writing to socket", 1);
+	
 	closedir(d);
   }
-
-  printf("Directory text:\n%s", text);
 
   free(text);
 }
@@ -377,41 +428,7 @@ int main(int argc, char **argv)
   
   
   /*
-  char handle[HANDLEMAX+1];
-  char message[HANDLEMAX+MESSAGEMAX+3];
-  bool conn_good = true;
 
-  get_handle(handle);
-
-  /* Configure the socket
-   * The following code was adapted from CS344, Lecture 4.2, slide 21
-   * "client.c"
-   *//*
-  int socketFD;
-  int charsRead = 1;
-
-  struct sockaddr_in serverAddress;
-  struct hostent* serverHostInfo;
-
-  memset((char*)&serverAddress, '\0', sizeof(serverAddress));
-  serverAddress.sin_family = AF_INET;
-  serverAddress.sin_port = htons(port);
-  serverHostInfo = gethostbyname(argv[1]);
-
-  if (serverHostInfo == NULL) error("ERROR, no such host",1);
-
-  memcpy((char*)&serverAddress.sin_addr.s_addr, (char*)serverHostInfo->h_addr, serverHostInfo->h_length);
-
-  socketFD = socket(AF_INET, SOCK_STREAM, 0);
-  if (socketFD < 0) error("ERROR opening socket", 1);
-
-  printf("Connecting to server for new chat connection...\n");
-
-  //connect to server
-  if (connect(socketFD, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0)
-	  error("ERROR connecting", 1);
-
-  printf("Chat connection established.\n");
 
   // as long as the connection is still good and quit isn't indicated
   while (conn_good == true && get_message_input(message, handle) == true)
