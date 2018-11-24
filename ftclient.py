@@ -84,7 +84,7 @@ if (response == LIST) :
 	
 	connectionSocket, addr = data_socket.accept()
 	
-  print "Receiving directory structure from " + server_host + ":" + data_port + "."
+	print "Receiving directory structure from " + server_host + ":" + data_port + "."
   
 	data = connectionSocket.recv(2000)
     
