@@ -416,7 +416,7 @@ void send_file(struct Conn *conn)
   char *contents;
 
   // read text from file
-  contents = read_file(filename);
+  contents = read_file(conn->filename);
   
   
 
