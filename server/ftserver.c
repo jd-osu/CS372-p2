@@ -397,7 +397,8 @@ void send_directory(struct Conn *conn)
       }
     }
   
-    text[i] = '\0';
+    // replace final newline with null character
+    text[i-1] = '\0';
     
     closedir(d);
   }
