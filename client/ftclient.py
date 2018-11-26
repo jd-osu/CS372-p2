@@ -76,11 +76,11 @@ def establish_data_connection(dat_port):
 	# Configure the data socket
 	# The following code has been adapted from CS372, Lecture 15, slide 9
 	# "Example application: TCP server"
-	socket = socket(AF_INET, SOCK_STREAM)
-	socket.bind(('',dat_port))
-	socket.listen(1)
+	dsocket = socket(AF_INET, SOCK_STREAM)
+	dsocket.bind(('',dat_port))
+	dsocket.listen(1)
 	
-	return socket
+	return dsocket
 
 #******************************************************
 # NAME
