@@ -43,8 +43,6 @@ def establish_control_connection(socket, host, serv_port, dat_port):
 	socket.send(str(dat_port))
 
 	response = socket.recv(1024)
-
-	print "Connection established with " + str(socket.getpeername())
 	
 	return socket
 
