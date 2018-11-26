@@ -38,13 +38,13 @@ def establish_control_connection(socket, host, serv_port, dat_port):
 	# The following code has been adapted from CS372, Lecture 15, slide 8
 	# "Example application: TCP client"
 	socket = socket(AF_INET, SOCK_STREAM)
-	socket.connect((host, port))
+	socket.connect((host, serv_port))
 	
 	socket.send(str(dat_port))
 
 	response = socket.recv(1024)
 
-	print "Connection established with " + str(ocket.getpeername())
+	print "Connection established with " + str(socket.getpeername())
 	
 	return socket
 
