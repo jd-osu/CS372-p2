@@ -3,7 +3,16 @@
  * Author: Jason DiMedio
  * CS372
  * November 25, 2018
- * [description]
+ * This program is the server component of a FTP
+ * application. The server takes as a command line
+ * argument a port number to listen on. The server
+ * accepts a connection from the client which serves
+ * as a control connection for receiving commands.
+ * A list directory command sends a directory listing
+ * to the client, while a get command (which takes a
+ * file name as an argument, causes the server to
+ * establish a data connection through which it transfers
+ * the file to the client.
  * *********************************************/
 
 #include <stdio.h>
@@ -23,11 +32,13 @@
 #define CLIENTADDRESS 50
 #define CLIENTNAME 100
 
+// program file names for filtering from directory listing
 static const char server_src_txt[] = "ftserver.c";
 static const char server_exc_txt[] = "ftserver";
 static const char client_src_txt[] = "ftclient.py";
 static const char makefile_txt[] = "makefile";
 
+// control commands
 static const char ack[] = "OK";
 static const char list[] = "-l";
 static const char get[] = "-g";
@@ -103,7 +114,7 @@ int sendall(int s, char *buf, int *len)
  * NAME
  *   read_file 
  * DESCRIPTION
- *   This program takes as an argument a string
+ *   This function takes as an argument a string
  *   representing a filename, opens a file for
  *   reading and then reads the contents of the
  *   file into a string, which it then returns.
@@ -157,17 +168,6 @@ char *read_file(const char *filename)
     i++;
   }
 
-  // remove final newline 
-  //if (text[i-1] == '\n')
-  //  text[i-1] = '\0';
-
-  // check if there are any other newlines (which would be invalid)
-  //if (strstr(text, "\n") != NULL)
-  //{
-    //sprintf(error_text, "Invalid char in %s", filename);
-    //error(error_text, 1); 
-  //}
-
   return text;
 }
 
@@ -175,6 +175,11 @@ char *read_file(const char *filename)
 * NAME
 *    establish_data_socket
 * DESCRIPTION
+*    This function takes as an argument a Conn object
+*    populated with command and data port information
+*    and establishes a TCP connection and populates
+*    the Conn object with a file descriptor for the
+*    data connection socket.
 ****************************************************/
 void establish_data_connection(struct Conn *conn)
 {
@@ -191,27 +196,23 @@ void establish_data_connection(struct Conn *conn)
   serverAddress.sin_family = AF_INET;
   serverAddress.sin_port = htons(conn->data_port);
   inet_pton(AF_INET, conn->client_address, &(serverAddress.sin_addr));
-  //serverHostInfo = gethostbyaddr((struct sockaddr*)&serverAddress, sizeOfServerInfo, AF_INET);
-
-  //if (serverHostInfo == NULL) error("ERROR, no such host",1);
-
-  //memcpy((char*)&serverAddress.sin_addr.s_addr, (char*)serverHostInfo->h_addr, serverHostInfo->h_length);
 
   conn->data_socket = socket(AF_INET, SOCK_STREAM, 0);
   if (conn->data_socket < 0) error("ERROR opening socket", 1);
 
-  printf("Establishing data connection with client at %s...\n", inet_ntoa(serverAddress.sin_addr));
-
   if (connect(conn->data_socket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0)
     error("ERROR connecting", 1);
-
-  printf("Data connection established with %s\n", conn->client_address);
 }
 
 /******************************************************
 * NAME
-*    establish_control_socket
+*    configure_control_socket
 * DESCRIPTION
+*    This function takes as an input a Conn object and
+*    a server port number and creates a socket for listening
+*    at the port specified by the server port number. The
+*    file descriptor for the socket is stored in the Conn
+*    object.
 ****************************************************/
 void configure_control_socket(struct Conn *conn, int port)
 {
@@ -245,8 +246,12 @@ void configure_control_socket(struct Conn *conn, int port)
 
 /******************************************************
 * NAME
-*    establish_control_socket
+*    establish_control_connection
 * DESCRIPTION
+*    This function takes as an input a Conn object
+*    populated with a file descriptor for a socket
+*    and stores the file descriptor for the connection
+*    in the Conn object along with the client IP address.
 ****************************************************/
 void establish_control_connection(struct Conn *conn)
 {
@@ -271,14 +276,17 @@ void establish_control_connection(struct Conn *conn)
 
 /******************************************************
 * NAME
-*    
+*    read_control
 * DESCRIPTION
+*    This function takes as an argument a Conn object
+*    populated with a file descriptor for a control
+*    connection and reads a string from the control
+*    connection. The string is stored in the Conn object.
 ****************************************************/
 void read_control(struct Conn *conn)
 {
   int charsRead;
   
-  // get data port first
   memset(conn->msg_buffer, '\0', BUFFER * sizeof(conn->msg_buffer[0]));
   charsRead = recv(conn->control_conn, conn->msg_buffer, BUFFER-1, 0);
   if (charsRead < 0) error("ERROR reading from socket", 1);
@@ -286,8 +294,12 @@ void read_control(struct Conn *conn)
 
 /******************************************************
 * NAME
-*    
+*    send_ctrl_msg
 * DESCRIPTION
+*    This function takes as an argument a Conn object 
+*    populated with a file descriptor for a control
+*    connection and sends the string through the control
+*    connection.
 ****************************************************/
 void send_ctrl_msg(struct Conn *conn, const char *msg)
 {
@@ -297,8 +309,12 @@ void send_ctrl_msg(struct Conn *conn, const char *msg)
 
 /******************************************************
 * NAME
-*    
+*    clear_connection
 * DESCRIPTION
+*    This function takes as an argument a Conn object 
+*    populated with data related to existing control
+*    and data connections, which it then clears to
+*    prepare the object to be used for another connection.
 ****************************************************/
 void clear_connection(struct Conn *conn)
 {
@@ -313,8 +329,14 @@ void clear_connection(struct Conn *conn)
 
 /************************************************
  * NAME
- *   send_directory
+ *    send_directory
  * DESCRIPTION
+ *    This function takes as an argument a Conn object
+ *    populated with a file descriptor for a data connection.
+ *    The contents of the present directory are then retrieved
+ *    and directory names and any program files are removed
+ *    from the list. A string representing the list is generated
+ *    and sent to the client via the data connection.
  *
  *NOTE: The main part of this function was adapted from:
  *"How to list files in a directory in a C program?"
@@ -409,6 +431,11 @@ void send_directory(struct Conn *conn)
 * NAME
 *    send_file
 * DESCRIPTION
+*    This function takes as an argument a Conn object
+*    populated with a file descriptor for a data connection
+*    along with a filename for a requested file.
+*    The contents of the file are then retrieved
+*    sent to the client via the data connection.
 ****************************************************/
 void send_file(struct Conn *conn)
 {
@@ -471,18 +498,18 @@ void send_file(struct Conn *conn)
 
 /************************************************
  * NAME
- *  process_command
+ *    process_command
  * DESCRIPTION
- *  
+ *    This function takes as an argument a Conn object
+ *    populated with a string received from the client.
+ *    The string is parsed to extract command information
+ *    and any arguments pertaining to the command, which
+ *    are stored in the Conn object. Appropriate actions
+ *    are then taken based on the specific commands.
  * *********************************************/
 void process_command(struct Conn *conn)
 {
-  // global constant variables for commands
-
-  static const char file_dir[] = "[file directory!]";
-  static const char get_res[] = "[getting file!]";
   static const char invalid_cmd[] = "Invalid command!";
-
   
   // The following code for getting the command substring was adapted from:
   // "Get a substring of a char* [duplicate]"
@@ -518,29 +545,27 @@ int main(int argc, char **argv)
     exit(1);
   }
 
+  int port = atoi(argv[1]);
+
+  // validate server port (range 1025-65535)
+  if (port <= 1024 || port > 65535)
+    error("INVALID INPUT: Port must be in range 1025-65535", 1);
+
   struct Conn conn;
     
-  configure_control_socket(&conn, atoi(argv[1]));
+  configure_control_socket(&conn, port);
   
   while(1)
   {
     establish_control_connection(&conn);
     
-    // get data port first
+    // get data port and send ACK
     read_control(&conn);
-    printf("1. I received this from the client: %s\n", conn.msg_buffer);
-    
     conn.data_port = atoi(conn.msg_buffer);
-    printf("Here is the data_port as an int: %d\n", conn.data_port);
-      
-    // send ACK "OK" msg in response
     send_ctrl_msg(&conn, ack);    
     
-    // get command
+    // get command and process
     read_control(&conn);
-    printf("2. I received this from the client: %s\n", conn.msg_buffer);
-    
-    // process command and send control response
     process_command(&conn);
     
     clear_connection(&conn);
