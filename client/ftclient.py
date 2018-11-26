@@ -117,7 +117,7 @@ def receive_data(control_socket, data_socket, response):
 		
 		connectionSocket, addr = data_socket.accept()
 		
-		print "Receiving " + filename + "from " + server_host + ":" + str(data_port) + "."
+		print "Receiving " + filename + " from " + server_host + ":" + str(data_port) + "."
 	  
 		file_contents=""
 		
